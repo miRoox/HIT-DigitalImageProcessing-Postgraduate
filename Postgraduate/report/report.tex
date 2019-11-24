@@ -1,0 +1,105 @@
+% !TEX encoding = UTF-8
+\documentclass{hitgsrep}
+\usepackage{graphicx}
+\usepackage{amsmath}
+\usepackage{physics}
+\usepackage[outputdir={out}]{minted}% 代码高亮，需要Pygments
+
+\hitgsrepset{
+    author={卢}, % 学生姓名
+    studentid={19SXXXXXX}, % 学号
+    studentcat={必修}, % 学生类别
+    course={数字图像处理}, % 考核科目
+    affiliation={仪器科学与工程学院}, % 学生所在院（系）
+    discipline={仪器科学与技术}, % 学生所在学科
+%    year={\the\year}, % 年份（不填根据当前时间自动生成）
+%    semester={秋}, % 学期（不填根据当前时间自动生成）
+}
+
+\ctexset{
+    section/format=\Large\bfseries
+}
+
+% C++代码高亮
+\newmintedfile[cppfile]{cpp}{linenos,fontsize=\footnotesize}
+
+\newcommand{\todo}{{\emph{待完善}\par}}
+
+\begin{document}
+\maketitle
+
+\section{题目}
+
+局部统计特征增强
+
+并与全局直方图均衡化对比，用钨丝灰度图。
+
+\section{数学原理}
+
+\subsection{全局直方图均衡化}
+
+考虑连续灰度值，并用$r$表示待处理图像的灰度。考虑灰度映射
+\begin{equation}
+    s=T(r)\qc{0\le r\le L-1}
+\end{equation}
+满足
+\begin{enumerate}
+    \item $T(r)$在区间$[0,L-1]$上单调递增；
+    \item 当$0\le r\le L-1$时，$0\le T(r)\le L-1$。
+\end{enumerate}
+
+一幅图像的灰度级可以看作是$[0,L-1]$范围内的随机变量，其概率密度函数（PDF）刻画了灰度分布的基本形态。
+令$p_r(r)$和$p_s(s)$分别为随机变量$r$和$s$的概率密度函数。
+由概率论知识可以知道，由于$T(r)$的单调性，代表相同范围的累积分布函数（CDF）应该相等
+\begin{equation}\label{eq:cdf-eq}
+    \int_{0}^{s}p_s(s')\dd{s'}=\int_{0}^{r}p_r(r')\dd{r'}
+\end{equation}
+
+所谓直方图均衡化，即通过变换将原始图像的灰度级分布变换到全部灰度范围上的均匀分布，从而增强图像的对比度。
+这一目的亦即，寻找$s=T(r)$使
+\begin{equation}\label{eq:hist-eql-target}
+    p_s(s)=\frac{1}{L-1}
+\end{equation}
+
+将式\eqref{eq:hist-eql-target}代入式\eqref{eq:cdf-eq}，即可得到
+\begin{equation}\label{eq:hist-eql-cont}
+    s=T(r)=(L-1)\int_0^r p_r(r')\dd{r'}
+\end{equation}
+
+为了对数字图像进行处理，必须引入离散形式的公式。
+当灰度级是离散值的时候，可以用频数近似代替概率值，即
+\begin{equation}
+    p_r\qty(r_k)=n_k/n\qc{k=0,1,\cdots,L-1}
+\end{equation}
+其中，$n$为图像总像素数，$n_k$是灰度为$r_k$的像素个数，$L$是图像可能的灰度级数目。
+从而可以给出式\eqref{eq:hist-eql-cont}的离散形式
+\begin{equation}
+    s_k=T\qty(r_k)=(L-1)\sum_{j=0}^k p_r(r_j)=\frac{L-1}{n}\sum_{j=0}^k n_j\qc{k=0,1,\cdots,L-1}
+\end{equation}
+变换$T(r_k)$即\emph{直方图均衡化}。
+
+\subsection{局部直方图增强}
+
+\todo
+
+\section{算法步骤}
+
+\todo
+
+\section{结果分析与讨论}
+
+\todo
+
+\appendix
+
+\section{核心算法代码}
+
+\noindent 头文件\textbf{algorithms.h}:
+
+\cppfile{../DIP/algorithms.h}
+
+\noindent 源文件\textbf{algorithms.cpp}:
+
+\cppfile{../DIP/algorithms.cpp}
+
+\end{document}
