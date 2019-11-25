@@ -2,16 +2,27 @@
 #include "ui_mainwindow.h"
 #include "imageview.h"
 #include <QImageReader>
+#include <QFileSystemModel>
 #include <QFileDialog>
 #include <QFileInfo>
 #include <QMessageBox>
 #include <QtCharts>
+
+void setupPathEdit(QLineEdit* edit)
+{
+    auto completer = new QCompleter(edit);
+    auto model = new QFileSystemModel(completer);
+    model->setRootPath("");
+    completer->setModel(model);
+    edit->setCompleter(completer);
+}
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
     , ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
+    setupPathEdit(ui->originPathEdit);
 
     connect(ui->originSelButton,&QPushButton::clicked,
             this,&MainWindow::openImageDialog);
