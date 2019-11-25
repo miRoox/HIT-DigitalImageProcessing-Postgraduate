@@ -28,11 +28,12 @@ ImageView::ImageView(QWidget *parent)
 
 void ImageView::setImage(const QImage &image)
 {
+    constexpr QSize snapshotSize{360,480};
     if (image == current || image.isNull())
         return;
     current = image;
     setEnabled(true);
-    view->setPixmap(QPixmap::fromImage(current));
+    view->setPixmap(QPixmap::fromImage(current).scaled(snapshotSize,Qt::KeepAspectRatio));
     emit imageChanged(current);
 }
 
