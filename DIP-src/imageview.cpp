@@ -20,7 +20,8 @@ ImageView::ImageView(QWidget *parent)
     connect(actionCopy,&QAction::triggered,[this]{
         QApplication::clipboard()->setImage(current);
     });
-    connect(actionSave,&QAction::triggered,this,&ImageView::saveImageTriggered);
+    connect(actionSave,&QAction::triggered,
+            [this]{emit saveImageTriggered(current);});
     view->setPixmap(QPixmap(":/rc/icon/no-image.png"));
     setDisabled(true); // disabled when no image
 }

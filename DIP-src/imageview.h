@@ -15,7 +15,7 @@ public:
 
 signals:
     void imageChanged(const QImage& image);
-    void saveImageTriggered();
+    void saveImageTriggered(const QImage& image);
 
 public slots:
     void setImage(const QImage& image);

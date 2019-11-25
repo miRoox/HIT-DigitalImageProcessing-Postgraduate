@@ -18,6 +18,7 @@ public:
 public slots:
     void openImage(const QString& fileName);
     void openImageDialog();
+    void saveImageFromView(const QImage& image);
 
 private:
     Ui::MainWindow *ui;

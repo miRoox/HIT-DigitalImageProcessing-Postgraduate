@@ -3,6 +3,7 @@
 #include "imageview.h"
 #include <QImageReader>
 #include <QFileDialog>
+#include <QFileInfo>
 #include <QMessageBox>
 #include <QtCharts>
 
@@ -16,6 +17,13 @@ MainWindow::MainWindow(QWidget *parent)
             this,&MainWindow::openImageDialog);
     connect(ui->originPathEdit,&QLineEdit::returnPressed,
             [this]{openImage(ui->originPathEdit->text());});
+
+    connect(ui->originView,&ImageView::saveImageTriggered,
+            this,&MainWindow::saveImageFromView);
+    connect(ui->globalEnhView,&ImageView::saveImageTriggered,
+            this,&MainWindow::saveImageFromView);
+    connect(ui->localEnhView,&ImageView::saveImageTriggered,
+            this,&MainWindow::saveImageFromView);
 }
 
 MainWindow::~MainWindow()
@@ -28,6 +36,7 @@ void MainWindow::openImage(const QString &fileName)
     QImageReader reader(fileName);
     QImage image;
     if (reader.read(&image)) {
+        setWindowFilePath(fileName);
         ui->originView->setImage(image);
     } else {
         QMessageBox::critical(this,tr("无法读取图像"),reader.errorString(),QMessageBox::Cancel);
@@ -41,6 +50,36 @@ void MainWindow::openImageDialog()
     if (!fileName.isEmpty()) {
         ui->originPathEdit->setText(fileName);
         openImage(fileName);
+    }
+}
+
+void MainWindow::saveImageFromView(const QImage &image)
+{
+    QString key = QFileInfo(window()->windowFilePath()).baseName();
+    QString fileName = QFileDialog::getSaveFileName(this,tr("保存图像"),
+                                                    key + ".out.png",
+                                                    tr("图片 (*.png *.jpg *.jpeg *.bmp *.xpm)"));
+    if (!fileName.isEmpty())
+    {
+        bool retry = false;
+        do {
+            if (image.save(fileName))
+            {
+                QMessageBox::information(this,tr("图像保存成功！"),
+                                         tr("图像成功保存到 %1。").arg(fileName),
+                                         QMessageBox::Ok);
+                retry = false;
+            }
+            else
+            {
+                auto button =
+                        QMessageBox::warning(this,tr("图像保存失败！"),
+                                             tr("是否重试？"),
+                                             QMessageBox::Retry,QMessageBox::Cancel);
+                retry = button==QMessageBox::Retry;
+            }
+        }
+        while(retry);
     }
 }
 
