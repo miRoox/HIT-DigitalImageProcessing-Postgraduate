@@ -4,5 +4,5 @@
 
 并与全局直方图均衡化对比，用钨丝灰度图。
 
-* DIP - C++/Qt 程序项目
+* DIP-src - C++/Qt 程序源码
 * report - LaTeX 报告
