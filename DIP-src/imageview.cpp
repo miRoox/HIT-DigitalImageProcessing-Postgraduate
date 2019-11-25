@@ -14,8 +14,8 @@ ImageView::ImageView(QWidget *parent)
     layout->setMargin(0);
     layout->addWidget(view);
     setLayout(layout);
-    auto actionCopy = new QAction(tr("&Copy"),this);
-    auto actionSave = new QAction(tr("&Save"),this);
+    auto actionCopy = new QAction(tr("复制(&C)"),this);
+    auto actionSave = new QAction(tr("保存(&S)"),this);
     addAction(actionCopy);
     addAction(actionSave);
     connect(actionCopy,&QAction::triggered,[this]{
