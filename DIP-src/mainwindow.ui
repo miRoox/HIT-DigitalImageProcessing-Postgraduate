@@ -27,7 +27,11 @@
        <item>
         <layout class="QHBoxLayout" name="horizontalLayout_2">
          <item>
-          <widget class="QLineEdit" name="originPathEdit"/>
+          <widget class="QLineEdit" name="originPathEdit">
+           <property name="placeholderText">
+            <string>键入图片路径，按下Enter打开</string>
+           </property>
+          </widget>
          </item>
          <item>
           <widget class="QPushButton" name="originSelButton">

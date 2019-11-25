@@ -15,6 +15,10 @@ public:
     MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
 
+public slots:
+    void openImage(const QString& fileName);
+    void openImageDialog();
+
 private:
     Ui::MainWindow *ui;
 };
