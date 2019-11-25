@@ -15,12 +15,10 @@ public:
 
 signals:
     void imageChanged(const QImage& image);
+    void saveImageTriggered();
 
 public slots:
     void setImage(const QImage& image);
-
-private slots:
-    void saveImage();
 
 private:
     QLabel* view;
