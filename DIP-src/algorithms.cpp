@@ -5,12 +5,12 @@
 //! 计算图像直方图数据
 QVector<double> histogram(const QImage& image)
 {
-    const QImage img(image.convertToFormat(QImage::Format_Grayscale8));
+    Q_ASSERT_X(image.format()==QImage::Format_Grayscale8,__func__,"Non-grayscale");
     QVector<double> hist(0x100,0);
-    const int width = img.width();
-    const int height = img.height();
+    const int width = image.width();
+    const int height = image.height();
     for (int y=0; y<height; ++y) {
-        const uint8_t* line = img.scanLine(y);
+        const uint8_t* line = image.scanLine(y);
         for (int x=0; x<width; ++x) {
             hist[line[x]] += 1.0/(width*height);
         }
@@ -21,6 +21,7 @@ QVector<double> histogram(const QImage& image)
 //! 直方图均衡化
 QImage histogramEqualize(const QImage& image)
 {
+    Q_ASSERT_X(image.format()==QImage::Format_Grayscale8,__func__,"Non-grayscale");
     QImage out(image.size(),QImage::Format_Grayscale8);
     QVector<double> hist_map = histogram(image);
     std::partial_sum(hist_map.cbegin(),hist_map.cend(),hist_map.begin());

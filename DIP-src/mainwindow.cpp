@@ -48,7 +48,10 @@ void MainWindow::openImage(const QString &fileName)
     QImage image;
     if (reader.read(&image)) {
         setWindowFilePath(fileName);
-        ui->originView->setImage(image);
+        if (image.format()!=QImage::Format_Grayscale8) {
+            ui->statusbar->showMessage(tr("警告：图像已被转换为灰度格式"),10000);
+        }
+        ui->originView->setImage(image.convertToFormat(QImage::Format_Grayscale8));
     } else {
         QMessageBox::critical(this,tr("读取图像失败！"),reader.errorString(),QMessageBox::Cancel);
         ui->statusbar->showMessage(tr("读取图像失败！"),5000);
