@@ -1,12 +1,12 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 #include "imageview.h"
+#include <QCompleter>
 #include <QImageReader>
 #include <QFileSystemModel>
 #include <QFileDialog>
 #include <QFileInfo>
 #include <QMessageBox>
-#include <QtCharts>
 
 void setupPathEdit(QLineEdit* edit)
 {
