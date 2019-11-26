@@ -1,6 +1,8 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
+#include "algorithms.h"
 #include "imageview.h"
+#include "histogramview.h"
 #include <QCompleter>
 #include <QImageReader>
 #include <QFileSystemModel>
@@ -8,7 +10,7 @@
 #include <QFileInfo>
 #include <QMessageBox>
 
-void setupPathEdit(QLineEdit* edit)
+static void setupPathEdit(QLineEdit* edit)
 {
     auto completer = new QCompleter(edit);
     auto model = new QFileSystemModel(completer);
@@ -28,6 +30,9 @@ MainWindow::MainWindow(QWidget *parent)
             this,&MainWindow::openImageDialog);
     connect(ui->originPathEdit,&QLineEdit::returnPressed,
             [this]{openImage(ui->originPathEdit->text());});
+
+    connect(ui->originView,&ImageView::imageChanged,
+            ui->originHistView,&HistogramView::calculateImageHistogram);
 
     connect(ui->originView,&ImageView::saveImageTriggered,
             this,&MainWindow::saveImageFromView);
@@ -99,4 +104,3 @@ void MainWindow::saveImageFromView(const QImage &image)
         while(retry);
     }
 }
-

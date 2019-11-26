@@ -25,6 +25,9 @@
         <widget class="ImageView" name="originView" native="true"/>
        </item>
        <item>
+        <widget class="HistogramView" name="originHistView" native="true"/>
+       </item>
+       <item>
         <layout class="QHBoxLayout" name="horizontalLayout_2">
          <item>
           <widget class="QLineEdit" name="originPathEdit">
@@ -81,6 +84,12 @@
    <class>ImageView</class>
    <extends>QWidget</extends>
    <header>imageview.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>HistogramView</class>
+   <extends>QWidget</extends>
+   <header>histogramview.h</header>
    <container>1</container>
   </customwidget>
  </customwidgets>
