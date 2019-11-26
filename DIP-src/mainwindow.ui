@@ -28,8 +28,11 @@
         <layout class="QHBoxLayout" name="horizontalLayout_2">
          <item>
           <widget class="QLineEdit" name="originPathEdit">
+           <property name="statusTip">
+            <string>键入图片路径，按Enter打开</string>
+           </property>
            <property name="placeholderText">
-            <string>键入图片路径，按下Enter打开</string>
+            <string>键入图片路径</string>
            </property>
           </widget>
          </item>

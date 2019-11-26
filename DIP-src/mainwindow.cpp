@@ -50,7 +50,8 @@ void MainWindow::openImage(const QString &fileName)
         setWindowFilePath(fileName);
         ui->originView->setImage(image);
     } else {
-        QMessageBox::critical(this,tr("无法读取图像"),reader.errorString(),QMessageBox::Cancel);
+        QMessageBox::critical(this,tr("读取图像失败！"),reader.errorString(),QMessageBox::Cancel);
+        ui->statusbar->showMessage(tr("读取图像失败！"),5000);
     }
 }
 
@@ -83,11 +84,13 @@ void MainWindow::saveImageFromView(const QImage &image)
             }
             else
             {
+                ui->statusbar->showMessage(tr("图像保存失败！"));
                 auto button =
                         QMessageBox::warning(this,tr("图像保存失败！"),
                                              tr("是否重试？"),
                                              QMessageBox::Retry,QMessageBox::Cancel);
                 retry = button==QMessageBox::Retry;
+                ui->statusbar->clearMessage();
             }
         }
         while(retry);
