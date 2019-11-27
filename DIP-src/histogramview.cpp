@@ -27,7 +27,6 @@ HistogramView::HistogramView(QWidget *parent)
 {
     auto lseries = new QLineSeries();
     lseries->append(linePointsFromHistogram(data).toList());
-
     auto series = new QAreaSeries(lseries);
     QPen pen(Qt::gray);
     pen.setWidth(1);
@@ -39,7 +38,8 @@ HistogramView::HistogramView(QWidget *parent)
     gradient.setCoordinateMode(QGradient::ObjectBoundingMode);
     series->setBrush(gradient);
 
-    chart->addSeries(lseries);
+    chart->addSeries(series);
+    chart->legend()->hide();
     chart->createDefaultAxes();
     chart->axes(Qt::Horizontal).first()->setRange(0, 256);
     chart->axes(Qt::Vertical).first()->setMin(0);
@@ -74,7 +74,7 @@ void HistogramView::calculateImageHistogram(const QImage &image)
 void HistogramView::setHistogram(const HistogramView::Histogram &hist)
 {
     Q_ASSERT_X(hist.size()==0x100,__func__,"Unsuitable size.");
-    Q_ASSERT_X(qFuzzyCompare(std::accumulate(hist.cbegin(),hist.cend(),0.0),1.0),__func__,"Sum of frequencies is not one.");
+//    Q_ASSERT_X(qFuzzyCompare(std::accumulate(hist.cbegin(),hist.cend(),0.0),1.0),__func__,"Sum of frequencies is not one.");
     if (data==hist)
         return;
     data = hist;
@@ -92,4 +92,5 @@ void HistogramView::updateChart(const HistogramView::Histogram &hist)
     Q_CHECK_PTR(series);
     auto line = series->upperSeries();
     line->replace(linePointsFromHistogram(hist));
+    chart->axes(Qt::Vertical).first()->setMax(*std::max_element(hist.begin(),hist.end()));
 }
