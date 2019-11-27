@@ -26,10 +26,13 @@
        </attribute>
        <layout class="QHBoxLayout" name="horizontalLayout_2">
         <item>
-         <widget class="QGraphicsView" name="originView"/>
-        </item>
-        <item>
-         <widget class="QGraphicsView" name="originHistView"/>
+         <widget class="QSplitter" name="splitter">
+          <property name="orientation">
+           <enum>Qt::Horizontal</enum>
+          </property>
+          <widget class="QGraphicsView" name="originView"/>
+          <widget class="QtCharts::QChartView" name="originHistView"/>
+         </widget>
         </item>
        </layout>
       </widget>
@@ -37,6 +40,17 @@
        <attribute name="title">
         <string>全局直方图均衡化</string>
        </attribute>
+       <layout class="QHBoxLayout" name="horizontalLayout_3">
+        <item>
+         <widget class="QSplitter" name="splitter_2">
+          <property name="orientation">
+           <enum>Qt::Horizontal</enum>
+          </property>
+          <widget class="QGraphicsView" name="globalEnhView"/>
+          <widget class="QtCharts::QChartView" name="globalEnhHistView"/>
+         </widget>
+        </item>
+       </layout>
       </widget>
       <widget class="QWidget" name="localEnhTab">
        <attribute name="title">
@@ -60,6 +74,13 @@
    </attribute>
   </widget>
  </widget>
+ <customwidgets>
+  <customwidget>
+   <class>QtCharts::QChartView</class>
+   <extends>QGraphicsView</extends>
+   <header>QtCharts/QChartView</header>
+  </customwidget>
+ </customwidgets>
  <resources/>
  <connections/>
 </ui>

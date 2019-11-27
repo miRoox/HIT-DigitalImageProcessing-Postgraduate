@@ -15,6 +15,9 @@ public:
     MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
 
+signals:
+    void imageLoaded(const QImage& image);
+
 public slots:
     void openImage(const QString& fileName);
     void openImageDialog();
