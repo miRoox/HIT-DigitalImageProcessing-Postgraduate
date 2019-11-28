@@ -7,6 +7,6 @@ int main(int argc, char *argv[])
     QApplication a(argc, argv);
     MainWindow w;
     w.show();
-    w.openImage(":/rc/test-images/钨丝.png");
+    w.openImage(":/rc/test-images/Tungsten.png");
     return a.exec();
 }
