@@ -15,6 +15,10 @@
 #include <QFileDialog>
 #include <QFileInfo>
 #include <QMessageBox>
+#include <QDragEnterEvent>
+#include <QDropEvent>
+#include <QMimeData>
+#include <QUrl>
 
 using namespace QtCharts;
 
@@ -100,6 +104,7 @@ MainWindow::MainWindow(QWidget *parent)
         });
     }
 
+    setAcceptDrops(true);
     setWindowTitle(tr("数字图像处理 - 作业"));
 
     { // 原图像视图
@@ -128,7 +133,7 @@ MainWindow::~MainWindow()
     delete ui;
 }
 
-void MainWindow::openImage(const QString &fileName)
+bool MainWindow::openImage(const QString &fileName)
 {
     QImageReader reader(fileName);
     QImage image;
@@ -138,9 +143,11 @@ void MainWindow::openImage(const QString &fileName)
             ui->statusbar->showMessage(tr("警告：图像已被转换为灰度格式"),10000);
         }
         emit imageLoaded(image.convertToFormat(QImage::Format_Grayscale8));
+        return true;
     } else {
         QMessageBox::critical(this,tr("读取图像失败！"),reader.errorString(),QMessageBox::Cancel);
         ui->statusbar->showMessage(tr("读取图像失败！"),5000);
+        return false;
     }
 }
 
@@ -149,7 +156,7 @@ void MainWindow::openImageDialog()
     QString fileName = QFileDialog::getOpenFileName(this,tr("打开图像"),".",
                                                     tr("图片 (*.png *.jpg *.jpeg *.bmp *.xpm)"));
     if (!fileName.isEmpty()) {
-        openImage(fileName);//TODO: 允许拖放打开
+        openImage(fileName);
     }
 }
 
@@ -182,5 +189,27 @@ void MainWindow::saveImageFromView(const QImage &image)
             }
         }
         while(retry);
+    }
+}
+
+void MainWindow::dragEnterEvent(QDragEnterEvent *e)
+{
+    if (e->mimeData()->hasUrls()) {
+        e->acceptProposedAction();
+    } else {
+        e->ignore();
+    }
+}
+
+void MainWindow::dropEvent(QDropEvent *e)
+{
+    const auto mimeData = e->mimeData();
+    if (mimeData->hasUrls()) {
+        QString fileName = mimeData->urls().first().toLocalFile();
+        if (!fileName.isEmpty()) {
+            if (openImage(fileName)){
+                ui->tabWidget->setCurrentWidget(ui->originTab);
+            }
+        }
     }
 }

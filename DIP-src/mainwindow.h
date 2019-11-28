@@ -19,9 +19,13 @@ signals:
     void imageLoaded(const QImage& image);
 
 public slots:
-    void openImage(const QString& fileName);
+    bool openImage(const QString& fileName);
     void openImageDialog();
     void saveImageFromView(const QImage& image);
+
+protected:
+    void dragEnterEvent(QDragEnterEvent* e);
+    void dropEvent(QDropEvent* e);
 
 private:
     Ui::MainWindow *ui;
