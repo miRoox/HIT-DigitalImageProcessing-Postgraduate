@@ -80,7 +80,12 @@ MainWindow::MainWindow(QWidget *parent)
         auto openBtn = new QToolButton;
         openBtn->setIcon(QIcon(":/rc/icon/open.png"));
         auto menu = new QMenu;
-        // TODO: 自带测试图片
+        for (const QFileInfo& file : QDir(":/rc/test-images/").entryInfoList()) {
+            menu->addAction(file.baseName(),[this,file]{
+                openImage(file.absoluteFilePath());
+            });
+        }
+        menu->addSeparator();
         auto openFileAction = new QAction(tr("从文件中打开"));
         connect(openFileAction,&QAction::triggered,
                 this,&MainWindow::openImageDialog);
