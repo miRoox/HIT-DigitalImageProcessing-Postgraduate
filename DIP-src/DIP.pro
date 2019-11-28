@@ -17,15 +17,11 @@ DEFINES += QT_DEPRECATED_WARNINGS
 
 SOURCES += \
     algorithms.cpp \
-    histogramview.cpp \
-    imageview.cpp \
     main.cpp \
     mainwindow.cpp
 
 HEADERS += \
     algorithms.h \
-    histogramview.h \
-    imageview.h \
     mainwindow.h
 
 FORMS += \
