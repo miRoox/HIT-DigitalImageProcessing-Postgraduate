@@ -85,7 +85,22 @@ MainWindow::MainWindow(QWidget *parent)
         openBtn->setPopupMode(QToolButton::MenuButtonPopup);
         ui->toolBar->addWidget(openBtn);
     }
-    // TODO:保存、关于
+    // TODO:保存
+
+    { // “关于”按钮
+        ui->toolBar->addAction(QIcon(":/rc/icon/information.png"),
+                               tr("关于"),[this]{
+            QMessageBox::about(this,tr("关于本程序"),
+                               tr("<h1>数字图像处理 - 作业</h1>")+
+                               tr("<h2>局部统计特征增强</h2>")+
+                               tr("<p>并与全局直方图均衡化对比，用钨丝灰度图。</p>")+
+                               tr("<hr/>")+
+                               tr("<p>本程序基于<a href=\"https://www.qt.io/\">Qt</a>构建</p>")+
+                               tr("<p>图标由<a href=\"https://www.flaticon.com/authors/good-ware\" title=\"Good Ware\">Good Ware</a>和<a href=\"https://www.flaticon.com/authors/freepik\" title=\"Freepik\">Freepik</a>制作</p>"));
+        });
+    }
+
+    setWindowTitle(tr("数字图像处理 - 作业"));
 
     { // 原图像视图
         auto scene = new QGraphicsScene(this);
@@ -106,8 +121,6 @@ MainWindow::MainWindow(QWidget *parent)
         });
     }
     // TODO: 直方图均衡化、局部直方图统计增强
-
-    setWindowTitle(tr("数字图像处理 - 作业"));
 }
 
 MainWindow::~MainWindow()
