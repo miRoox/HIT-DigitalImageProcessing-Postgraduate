@@ -115,6 +115,19 @@ MainWindow::MainWindow(QWidget *parent)
     setAcceptDrops(true);
     setWindowTitle(tr("数字图像处理 - 作业"));
 
+    { // Splitter 同步
+        auto syncSplitter = [this](const QSplitter* current)->auto{
+            return [current,this]{
+                ui->splitter_1->setSizes(current->sizes());
+                ui->splitter_2->setSizes(current->sizes());
+                ui->splitter_3->setSizes(current->sizes());
+            };
+        };
+        connect(ui->splitter_1,&QSplitter::splitterMoved,syncSplitter(ui->splitter_1));
+        connect(ui->splitter_2,&QSplitter::splitterMoved,syncSplitter(ui->splitter_2));
+        connect(ui->splitter_3,&QSplitter::splitterMoved,syncSplitter(ui->splitter_3));
+    }
+
     { // 原图像视图
         auto scene = new QGraphicsScene(this);
         auto item = scene->addPixmap(QPixmap(":/rc/icon/no-image.png"));
