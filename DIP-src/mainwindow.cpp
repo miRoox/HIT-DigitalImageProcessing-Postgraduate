@@ -109,7 +109,7 @@ MainWindow::MainWindow(QWidget *parent)
         });
         menu->addAction(tr("保存当前直方图"),[this]{
             QGraphicsView* current = nullptr;
-            const auto list = {ui->originHistView,ui->globalEnhHistView};
+            const auto list = {ui->originHistView,ui->globalEnhHistView,ui->localEnhHistView};
             for (const auto view : list) {
                 if (ui->tabWidget->currentWidget()->isAncestorOf(view)) {
                     current = view;
