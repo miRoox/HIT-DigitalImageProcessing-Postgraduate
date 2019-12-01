@@ -23,6 +23,7 @@ public slots:
     void saveImageFromView(const QImage& image);
 
 protected:
+    bool eventFilter(QObject* obj, QEvent* e);
     void dragEnterEvent(QDragEnterEvent* e);
     void dropEvent(QDropEvent* e);
 

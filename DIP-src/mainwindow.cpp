@@ -122,7 +122,9 @@ MainWindow::MainWindow(QWidget *parent)
             item->setPixmap(QPixmap::fromImage(image));
             item->setData(GraphicsItemImageDataKey,image);
         });
-        ui->originView->setScene(scene);// TODO: 缩放
+        ui->originView->setScene(scene);
+        ui->originView->setResizeAnchor(QGraphicsView::AnchorUnderMouse);
+        ui->originView->installEventFilter(this);// TODO: 缩放
     }
 
     { // 原图像直方图视图
@@ -189,6 +191,33 @@ void MainWindow::saveImageFromView(const QImage &image)
         }
         while(retry);
     }
+}
+
+static bool viewZoomByWheel(QGraphicsView* view, QWheelEvent* e)
+{
+    Q_UNUSED(view)
+    if (QApplication::keyboardModifiers() == Qt::ControlModifier)
+    {
+        if (e->delta() > 0) {
+            // zoom in
+        } else {
+            // zoom out
+        }
+        return true;
+    }
+    return false;
+}
+
+bool MainWindow::eventFilter(QObject *obj, QEvent *e)
+{
+    auto view = qobject_cast<QGraphicsView*>(obj);
+    if (view) {
+        if (e->type()==QEvent::Wheel) {
+            auto wheelEvent = static_cast<QWheelEvent*>(e);
+            return viewZoomByWheel(view,wheelEvent);
+        }
+    }
+    return QMainWindow::eventFilter(obj,e);
 }
 
 void MainWindow::dragEnterEvent(QDragEnterEvent *e)
