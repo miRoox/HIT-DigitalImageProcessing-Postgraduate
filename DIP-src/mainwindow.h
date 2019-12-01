@@ -20,7 +20,6 @@ signals:
 
 public slots:
     bool openImage(const QString& fileName);
-    void openImageDialog();
     void saveImageFromView(const QImage& image);
 
 protected:
