@@ -2,6 +2,7 @@
 #define MAINWINDOW_H
 
 #include <QMainWindow>
+#include <QVector>
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
@@ -21,7 +22,7 @@ signals:
 public slots:
     bool openImage(const QString& fileName);
     void openImageDialog();
-    void saveImageFromView(const QImage& image);
+    void saveImage(const QImage& image,const QString& fileName);
 
 protected:
     void dragEnterEvent(QDragEnterEvent* e);
@@ -29,5 +30,6 @@ protected:
 
 private:
     Ui::MainWindow *ui;
+    QVector<QImage> images;
 };
 #endif // MAINWINDOW_H

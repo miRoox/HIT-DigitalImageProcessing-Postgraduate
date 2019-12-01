@@ -22,8 +22,6 @@
 
 using namespace QtCharts;
 
-constexpr static int GraphicsItemImageDataKey = 0;
-
 static QVector<QPointF> linePointsFromHistogram(const QVector<double>& hist)
 {
     QVector<QPointF> points;
@@ -72,7 +70,8 @@ static void setupHistogramView(QChartView*const view, QChart*const chart)
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
-    , ui(new Ui::MainWindow)
+    , ui(new Ui::MainWindow),
+      images(3)
 {
     ui->setupUi(this);
 
@@ -94,7 +93,40 @@ MainWindow::MainWindow(QWidget *parent)
         openBtn->setPopupMode(QToolButton::MenuButtonPopup);
         ui->toolBar->addWidget(openBtn);
     }
-    // TODO:保存
+
+    { // “保存”按钮
+        auto saveBtn = new QToolButton;
+        saveBtn->setIcon(QIcon(":/rc/icon/save.png"));
+        auto menu = new QMenu;
+        menu->addAction(tr("保存当前图片"),[this]{
+            QString fileName = QFileDialog::getSaveFileName(this,tr("保存当前图片"),
+                                                            QFileInfo(windowFilePath()).fileName(),
+                                                            tr("图片 (*.png *.jpg *.jpeg *.bmp *.xpm)"));
+            saveImage(images[ui->tabWidget->currentIndex()],fileName);
+        });
+        menu->addAction(tr("保存当前直方图"),[this]{
+            QGraphicsView* current = nullptr;
+            const auto list = {ui->originHistView,ui->globalEnhHistView};
+            for (const auto view : list) {
+                if (ui->tabWidget->currentWidget()->isAncestorOf(view)) {
+                    current = view;
+                    break;
+                }
+            }
+            Q_CHECK_PTR(current);
+            QImage image(current->rect().size(),QImage::Format_Grayscale8);
+            QPainter painter(&image);
+            current->render(&painter);
+            QFileInfo fileInfo(window()->windowFilePath());
+            QString path = fileInfo.baseName()+"-hist."+fileInfo.suffix();
+            QString fileName = QFileDialog::getSaveFileName(this,tr("保存当前直方图"),path,
+                                                            tr("图片 (*.png *.jpg *.jpeg *.bmp *.xpm)"));
+            saveImage(image,fileName);
+        });
+        saveBtn->setMenu(menu);
+        saveBtn->setPopupMode(QToolButton::MenuButtonPopup);
+        ui->toolBar->addWidget(saveBtn);
+    }
 
     { // “关于”按钮
         ui->toolBar->addAction(QIcon(":/rc/icon/information.png"),
@@ -113,11 +145,13 @@ MainWindow::MainWindow(QWidget *parent)
     setWindowTitle(tr("数字图像处理 - 作业"));
 
     { // 原图像视图
+        connect(this,&MainWindow::imageLoaded,[this](const QImage& image){
+            images.replace(0,image);
+        });
         auto scene = new QGraphicsScene(this);
         auto item = scene->addPixmap(QPixmap(":/rc/icon/no-image.png"));
         connect(this,&MainWindow::imageLoaded,[item](const QImage& image){
             item->setPixmap(QPixmap::fromImage(image));
-            item->setData(GraphicsItemImageDataKey,image);
         });
         ui->originView->setScene(scene);// TODO: 缩放
     }
@@ -165,12 +199,8 @@ void MainWindow::openImageDialog()
     }
 }
 
-void MainWindow::saveImageFromView(const QImage &image)
+void MainWindow::saveImage(const QImage &image, const QString &fileName)
 {
-    QString key = QFileInfo(window()->windowFilePath()).baseName();
-    QString fileName = QFileDialog::getSaveFileName(this,tr("保存图像"),
-                                                    key + ".out.png",
-                                                    tr("图片 (*.png *.jpg *.jpeg *.bmp *.xpm)"));
     if (!fileName.isEmpty())
     {
         bool retry = false;
