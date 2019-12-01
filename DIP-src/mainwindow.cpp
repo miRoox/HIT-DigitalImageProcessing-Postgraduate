@@ -85,10 +85,13 @@ MainWindow::MainWindow(QWidget *parent)
             });
         }
         menu->addSeparator();
-        auto openFileAction = new QAction(tr("从文件中打开"));
-        connect(openFileAction,&QAction::triggered,
-                this,&MainWindow::openImageDialog);
-        menu->addAction(openFileAction);
+        menu->addAction(tr("从文件中打开"),[this]{
+            QString fileName = QFileDialog::getOpenFileName(this,tr("打开图像"),".",
+                                                            tr("图片 (*.png *.jpg *.jpeg *.bmp *.xpm)"));
+            if (!fileName.isEmpty()) {
+                openImage(fileName);
+            }
+        });
         openBtn->setMenu(menu);
         openBtn->setPopupMode(QToolButton::MenuButtonPopup);
         ui->toolBar->addWidget(openBtn);
@@ -144,6 +147,19 @@ MainWindow::MainWindow(QWidget *parent)
     setAcceptDrops(true);
     setWindowTitle(tr("数字图像处理 - 作业"));
 
+    { // Splitter 同步
+        auto syncSplitter = [this](const QSplitter* current)->auto{
+            return [current,this]{
+                ui->splitter_1->setSizes(current->sizes());
+                ui->splitter_2->setSizes(current->sizes());
+                ui->splitter_3->setSizes(current->sizes());
+            };
+        };
+        connect(ui->splitter_1,&QSplitter::splitterMoved,syncSplitter(ui->splitter_1));
+        connect(ui->splitter_2,&QSplitter::splitterMoved,syncSplitter(ui->splitter_2));
+        connect(ui->splitter_3,&QSplitter::splitterMoved,syncSplitter(ui->splitter_3));
+    }
+
     { // 原图像视图
         connect(this,&MainWindow::imageLoaded,[this](const QImage& image){
             images.replace(0,image);
@@ -187,15 +203,6 @@ bool MainWindow::openImage(const QString &fileName)
         QMessageBox::critical(this,tr("读取图像失败！"),reader.errorString(),QMessageBox::Cancel);
         ui->statusbar->showMessage(tr("读取图像失败！"),5000);
         return false;
-    }
-}
-
-void MainWindow::openImageDialog()
-{
-    QString fileName = QFileDialog::getOpenFileName(this,tr("打开图像"),".",
-                                                    tr("图片 (*.png *.jpg *.jpeg *.bmp *.xpm)"));
-    if (!fileName.isEmpty()) {
-        openImage(fileName);
     }
 }
 
