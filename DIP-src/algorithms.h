@@ -5,6 +5,6 @@
 #include <QImage>
 
 QVector<double> histogram(const QImage& image);
-QImage histogramEqualize(const QImage& image);
+QImage equalizeHistogram(const QImage& image);
 
 #endif // ALGORITHMS_H
