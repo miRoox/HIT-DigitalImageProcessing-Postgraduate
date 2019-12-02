@@ -2,10 +2,10 @@ name: Build on Windows
 on: 
   push:
     paths:
-      - 'DIP-src'
+      - 'DIP-src/**'
   pull_request:
     paths:
-      - 'DIP-src'
+      - 'DIP-src/**'
 jobs:
   build:
     name: Build
