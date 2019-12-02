@@ -1,0 +1,28 @@
+name: Build Report Document
+
+on: 
+  push:
+    paths-ignore:
+      - 'README.md'
+      - 'LICENSE'
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v1
+    - name: Compile LaTeX document
+      uses: xu-cheng/latex-action@master
+      with:
+          root_file: report/report.tex
+          args: -xelatex
+          extra_system_packages: "py-pygments"
+    - run: mkdir report/report
+    - run: cp report/out/report.pdf report/report/report.pdf
+    - uses: actions/upload-artifact@v1
+      with: 
+        name: report
+        path: report/report
+    
