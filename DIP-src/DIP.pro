@@ -2,7 +2,8 @@
 
 TEMPLATE = app
 TARGET = DIP
-DESTDIR = ./
+
+CONFIG(release, debug|release):  DESTDIR = ../release
 
 VERSION = 0.1.0
 
@@ -39,6 +40,6 @@ RESOURCES += \
     asset.qrc
 
 CONFIG(release, debug|release) {
-      win32: QMAKE_POST_LINK += $$[QT_INSTALL_BINS]/windeployqt $$shell_path($$shadowed($$_PRO_FILE_PWD_))  $$escape_expand(\\n\\t)
-      mac: QMAKE_POST_LINK += $$[QT_INSTALL_BINS]/macdeployqt $$shell_path($$shadowed($$_PRO_FILE_PWD_))  $$escape_expand(\\n\\t)
+      win32: QMAKE_POST_LINK += $$[QT_INSTALL_BINS]/windeployqt $$shell_path($$absolute_path($$DESTDIR))  $$escape_expand(\\n\\t)
+      mac: QMAKE_POST_LINK += $$[QT_INSTALL_BINS]/macdeployqt $$shell_path($$absolute_path($$DESTDIR))  $$escape_expand(\\n\\t)
 }
