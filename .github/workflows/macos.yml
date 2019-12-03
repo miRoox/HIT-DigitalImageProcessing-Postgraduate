@@ -1,0 +1,39 @@
+name: Build on MacOS
+on: 
+  push:
+    paths-ignore:
+      - 'report/**'
+      - 'README.md'
+      - 'LICENSE'
+  pull_request:
+    paths-ignore:
+      - 'report/**'
+      - 'README.md'
+      - 'LICENSE'
+jobs:
+  build:
+    name: Build
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [macos-latest]
+    steps:
+      - name: Install Qt
+        if: steps.cacheqt.outputs.cache-hit != 'true'
+        uses: jurplel/install-qt-action@v2.0.0
+        with:
+          modules: qtcharts
+      - uses: actions/checkout@v1
+        with:
+          fetch-depth: 1
+      - name: build macos
+        run: |
+          cd DIP-src
+          export PATH=$PATH:$Qt5_Dir
+          qmake
+          make
+      - name: CacheQt
+        uses: actions/cache@v1
+        with:
+          path: ${{ env.Qt5_Dir }}
+          key: ${{ runner.OS }}-Qt
