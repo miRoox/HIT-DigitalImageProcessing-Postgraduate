@@ -16,8 +16,6 @@ jobs:
     runs-on: windows-latest
     strategy:
       matrix:
-        qt_ver: [5.12.6]
-        qt_target: [desktop]
         qt_arch: [win64_msvc2017_64, win32_msvc2017]
     steps:
       - name: Install Qt
@@ -25,12 +23,8 @@ jobs:
         if: steps.cacheqt.outputs.cache-hit != 'true'
         uses: jurplel/install-qt-action@v2.0.0
         with:
-          # Version of Qt to install
-          version: ${{ matrix.qt_ver }}
-          # Target platform for build
-          target: ${{ matrix.qt_target }}
-          # Architecture for Windows/Android
           arch: ${{ matrix.qt_arch }}
+          modules: qtcharts
       - uses: actions/checkout@v1
         with:
           fetch-depth: 1
@@ -50,11 +44,10 @@ jobs:
           call "C:\Program Files (x86)\Microsoft Visual Studio\2019\Enterprise\VC\Auxiliary\Build\vcvars32.bat"
           qmake
           nmake
-      # 条件缓存
       - name: CacheQt
         uses: actions/cache@v1
         # cache有大小限制，单个缓存不超过400M，整个仓库的缓存不超过2G。所以这里只缓存一个特定版本。
-        if: matrix.qt_ver == '5.12.6' && matrix.qt_arch == 'win64_msvc2017_64'
+        if: matrix.qt_arch == 'win64_msvc2017_64'
         with:
           path: ${{ env.Qt5_Dir }}
-          key: ${{ runner.OS }}-Qt-${{ matrix.qt_ver }}-${{ matrix.qt_target }}-${{ matrix.qt_arch }}
+          key: ${{ runner.OS }}-Qt-${{ matrix.qt_arch }}
