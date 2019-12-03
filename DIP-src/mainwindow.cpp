@@ -22,6 +22,11 @@
 
 using namespace QtCharts;
 
+static constexpr int originTabIndex = 0;
+static constexpr int globalEnhTabIndex = 1;
+static constexpr int localEnhTabIndex = 2;
+static constexpr int tabCount = 3;
+
 static QVector<QPointF> linePointsFromHistogram(const QVector<double>& hist)
 {
     QVector<QPointF> points;
@@ -71,7 +76,7 @@ static void setupHistogramView(QChartView*const view, QChart*const chart)
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
     , ui(new Ui::MainWindow),
-      images(3)
+      images(tabCount)
 {
     ui->setupUi(this);
 
@@ -162,7 +167,7 @@ MainWindow::MainWindow(QWidget *parent)
 
     { // 原图像视图
         connect(this,&MainWindow::imageLoaded,[this](const QImage& image){
-            images.replace(0,image);
+            images.replace(originTabIndex,image);
         });
         auto scene = new QGraphicsScene(this);
         auto item = scene->addPixmap(QPixmap(":/rc/icon/no-image.png"));
