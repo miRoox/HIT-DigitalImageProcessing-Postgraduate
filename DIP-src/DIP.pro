@@ -1,3 +1,12 @@
+# 数字图像处理
+
+TEMPLATE = app
+TARGET = DIP
+
+CONFIG(release, debug|release):  DESTDIR = ../release
+
+VERSION = 0.5.0
+
 QT       += core gui charts
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
@@ -27,10 +36,10 @@ HEADERS += \
 FORMS += \
     mainwindow.ui
 
-# Default rules for deployment.
-qnx: target.path = /tmp/$${TARGET}/bin
-else: unix:!android: target.path = /opt/$${TARGET}/bin
-!isEmpty(target.path): INSTALLS += target
-
 RESOURCES += \
     asset.qrc
+
+CONFIG(release, debug|release) {
+      win32: QMAKE_POST_LINK += $$[QT_INSTALL_BINS]/windeployqt $$shell_path($$absolute_path($$DESTDIR))  $$escape_expand(\\n\\t)
+      mac: QMAKE_POST_LINK += $$[QT_INSTALL_BINS]/macdeployqt $$shell_path($$absolute_path($$DESTDIR))  $$escape_expand(\\n\\t)
+}

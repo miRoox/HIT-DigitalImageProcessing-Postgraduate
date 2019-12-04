@@ -26,7 +26,7 @@
        </attribute>
        <layout class="QHBoxLayout" name="horizontalLayout_2">
         <item>
-         <widget class="QSplitter" name="splitter">
+         <widget class="QSplitter" name="splitter_1">
           <property name="orientation">
            <enum>Qt::Horizontal</enum>
           </property>
@@ -56,6 +56,17 @@
        <attribute name="title">
         <string>局部直方图统计增强</string>
        </attribute>
+       <layout class="QVBoxLayout" name="verticalLayout">
+        <item>
+         <widget class="QSplitter" name="splitter_3">
+          <property name="orientation">
+           <enum>Qt::Horizontal</enum>
+          </property>
+          <widget class="QGraphicsView" name="localEnhView"/>
+          <widget class="QtCharts::QChartView" name="localEnhHistView"/>
+         </widget>
+        </item>
+       </layout>
       </widget>
      </widget>
     </item>

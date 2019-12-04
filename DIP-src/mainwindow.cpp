@@ -22,8 +22,6 @@
 
 using namespace QtCharts;
 
-constexpr static int GraphicsItemImageDataKey = 0;
-
 static QVector<QPointF> linePointsFromHistogram(const QVector<double>& hist)
 {
     QVector<QPointF> points;
@@ -97,7 +95,34 @@ MainWindow::MainWindow(QWidget *parent)
         openBtn->setPopupMode(QToolButton::MenuButtonPopup);
         ui->toolBar->addWidget(openBtn);
     }
-    // TODO:保存
+
+    { // “保存”按钮
+        auto saveBtn = new QToolButton;
+        saveBtn->setIcon(QIcon(":/rc/icon/save.png"));
+        auto menu = new QMenu;
+        menu->addAction(tr("保存当前图片"),[this]{
+            QString fileName = QFileDialog::getSaveFileName(this,tr("保存当前图片"),
+                                                            QFileInfo(windowFilePath()).fileName(),
+                                                            tr("图片 (*.png *.jpg *.jpeg *.bmp *.xpm)"));
+            QImage images[] = {origin,globalEnh,localEnh};// 注意：Tab页顺序依赖
+            saveImage(images[ui->tabWidget->currentIndex()],fileName);
+        });
+        menu->addAction(tr("保存当前直方图"),[this]{
+            QtCharts::QChartView* views[] = {ui->originHistView,ui->globalEnhHistView,ui->localEnhHistView};
+            auto current = views[ui->tabWidget->currentIndex()];// 注意：Tab页顺序依赖
+            QImage image(current->rect().size(),QImage::Format_Grayscale8);
+            QPainter painter(&image);
+            current->render(&painter);
+            QFileInfo fileInfo(window()->windowFilePath());
+            QString path = fileInfo.baseName()+"-hist."+fileInfo.suffix();
+            QString fileName = QFileDialog::getSaveFileName(this,tr("保存当前直方图"),path,
+                                                            tr("图片 (*.png *.jpg *.jpeg *.bmp *.xpm)"));
+            saveImage(image,fileName);
+        });
+        saveBtn->setMenu(menu);
+        saveBtn->setPopupMode(QToolButton::MenuButtonPopup);
+        ui->toolBar->addWidget(saveBtn);
+    }
 
     { // “关于”按钮
         ui->toolBar->addAction(QIcon(":/rc/icon/information.png"),
@@ -115,12 +140,24 @@ MainWindow::MainWindow(QWidget *parent)
     setAcceptDrops(true);
     setWindowTitle(tr("数字图像处理 - 作业"));
 
+    { // Splitter 同步
+        auto syncSplitter = [this](const QSplitter* current)->auto{
+            return [current,this]{
+                ui->splitter_1->setSizes(current->sizes());
+                ui->splitter_2->setSizes(current->sizes());
+                ui->splitter_3->setSizes(current->sizes());
+            };
+        };
+        connect(ui->splitter_1,&QSplitter::splitterMoved,syncSplitter(ui->splitter_1));
+        connect(ui->splitter_2,&QSplitter::splitterMoved,syncSplitter(ui->splitter_2));
+        connect(ui->splitter_3,&QSplitter::splitterMoved,syncSplitter(ui->splitter_3));
+    }
+
     { // 原图像视图
         auto scene = new QGraphicsScene(this);
         auto item = scene->addPixmap(QPixmap(":/rc/icon/no-image.png"));
-        connect(this,&MainWindow::imageLoaded,[item](const QImage& image){
-            item->setPixmap(QPixmap::fromImage(image));
-            item->setData(GraphicsItemImageDataKey,image);
+        connect(this,&MainWindow::imageLoaded,[item,this]{
+            item->setPixmap(QPixmap::fromImage(origin));
         });
         ui->originView->setScene(scene);
         ui->originView->setResizeAnchor(QGraphicsView::AnchorUnderMouse);
@@ -131,11 +168,34 @@ MainWindow::MainWindow(QWidget *parent)
         auto chart = new QChart;
         setupHistogramView(ui->originHistView,chart);
         chart->setTitle(tr("原图像的灰度直方图"));
-        connect(this,&MainWindow::imageLoaded,[chart](const QImage& image){
-            updateHistogramChart(chart,histogram(image));
+        connect(this,&MainWindow::imageLoaded,[chart,this]{
+            updateHistogramChart(chart,histogram(origin));
         });
     }
-    // TODO: 直方图均衡化、局部直方图统计增强
+
+    { // 全局直方图均衡化图像视图
+        auto scene = new QGraphicsScene(this);
+        auto item = scene->addPixmap(QPixmap(":/rc/icon/no-image.png"));
+        connect(this,&MainWindow::globalEnhUpdate,[item,this]{
+            item->setPixmap(QPixmap::fromImage(globalEnh));
+        });
+        ui->globalEnhView->setScene(scene);
+    }
+
+    { // 全局直方图均衡化图像直方图视图
+        auto chart = new QChart;
+        setupHistogramView(ui->globalEnhHistView,chart);
+        chart->setTitle(tr("全局直方图均衡化图像的灰度直方图"));
+        connect(this,&MainWindow::globalEnhUpdate,[chart,this]{
+            updateHistogramChart(chart,histogram(globalEnh));
+        });
+    }
+    // TODO: 局部直方图统计增强
+
+    connect(this,&MainWindow::imageLoaded,[this]{
+        globalEnh = equalizeHistogram(origin);
+        emit globalEnhUpdate();
+    });
 }
 
 MainWindow::~MainWindow()
@@ -152,7 +212,8 @@ bool MainWindow::openImage(const QString &fileName)
         if (image.format()!=QImage::Format_Grayscale8) {
             ui->statusbar->showMessage(tr("警告：图像已被转换为灰度格式"),10000);
         }
-        emit imageLoaded(image.convertToFormat(QImage::Format_Grayscale8));
+        origin = image.convertToFormat(QImage::Format_Grayscale8);
+        emit imageLoaded();
         return true;
     } else {
         QMessageBox::critical(this,tr("读取图像失败！"),reader.errorString(),QMessageBox::Cancel);
@@ -161,12 +222,8 @@ bool MainWindow::openImage(const QString &fileName)
     }
 }
 
-void MainWindow::saveImageFromView(const QImage &image)
+void MainWindow::saveImage(const QImage &image, const QString &fileName)
 {
-    QString key = QFileInfo(window()->windowFilePath()).baseName();
-    QString fileName = QFileDialog::getSaveFileName(this,tr("保存图像"),
-                                                    key + ".out.png",
-                                                    tr("图片 (*.png *.jpg *.jpeg *.bmp *.xpm)"));
     if (!fileName.isEmpty())
     {
         bool retry = false;

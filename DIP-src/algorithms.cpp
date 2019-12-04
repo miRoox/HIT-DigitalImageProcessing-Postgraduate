@@ -19,7 +19,7 @@ QVector<double> histogram(const QImage& image)
 }
 
 //! 直方图均衡化
-QImage histogramEqualize(const QImage& image)
+QImage equalizeHistogram(const QImage& image)
 {
     Q_ASSERT_X(image.format()==QImage::Format_Grayscale8,__func__,"Non-grayscale");
     QImage out(image.size(),QImage::Format_Grayscale8);
