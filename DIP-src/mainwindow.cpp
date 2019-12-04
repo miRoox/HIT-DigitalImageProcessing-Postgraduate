@@ -113,14 +113,10 @@ MainWindow::MainWindow(QWidget *parent)
             saveImage(images[ui->tabWidget->currentIndex()],fileName);
         });
         menu->addAction(tr("保存当前直方图"),[this]{
-            QGraphicsView* current = nullptr;
-            const auto list = {ui->originHistView,ui->globalEnhHistView,ui->localEnhHistView};
-            for (const auto view : list) {
-                if (ui->tabWidget->currentWidget()->isAncestorOf(view)) {
-                    current = view;
-                    break;
-                }
-            }
+            QList candidates = ui->tabWidget->currentWidget()->findChildren<QtCharts::QChartView*>();
+            // 注意：这里假定了每个Tab下都只有一个直方图的QChartView，如果后续有添加其它QChartView，则需要更精确的匹配模式
+            Q_ASSERT_X(!candidates.isEmpty(),__func__,"No Histogram View!");
+            auto current = candidates.first();
             Q_CHECK_PTR(current);
             QImage image(current->rect().size(),QImage::Format_Grayscale8);
             QPainter painter(&image);
