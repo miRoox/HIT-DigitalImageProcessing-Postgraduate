@@ -170,7 +170,30 @@ MainWindow::MainWindow(QWidget *parent)
             updateHistogramChart(chart,histogram(origin));
         });
     }
-    // TODO: 直方图均衡化、局部直方图统计增强
+
+    { // 全局直方图均衡化图像视图
+        auto scene = new QGraphicsScene(this);
+        auto item = scene->addPixmap(QPixmap(":/rc/icon/no-image.png"));
+        connect(this,&MainWindow::globalEnhUpdate,[item,this]{
+            item->setPixmap(QPixmap::fromImage(globalEnh));
+        });
+        ui->globalEnhView->setScene(scene);
+    }
+
+    { // 全局直方图均衡化图像直方图视图
+        auto chart = new QChart;
+        setupHistogramView(ui->globalEnhHistView,chart);
+        chart->setTitle(tr("全局直方图均衡化图像的灰度直方图"));
+        connect(this,&MainWindow::globalEnhUpdate,[chart,this]{
+            updateHistogramChart(chart,histogram(globalEnh));
+        });
+    }
+    // TODO: 局部直方图统计增强
+
+    connect(this,&MainWindow::imageLoaded,[this]{
+        globalEnh = equalizeHistogram(origin);
+        emit globalEnhUpdate();
+    });
 }
 
 MainWindow::~MainWindow()
