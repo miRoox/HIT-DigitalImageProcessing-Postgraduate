@@ -22,11 +22,6 @@
 
 using namespace QtCharts;
 
-static constexpr int originTabIndex = 0;
-static constexpr int globalEnhTabIndex = 1;
-static constexpr int localEnhTabIndex = 2;
-static constexpr int tabCount = 3;
-
 static QVector<QPointF> linePointsFromHistogram(const QVector<double>& hist)
 {
     QVector<QPointF> points;
@@ -75,8 +70,7 @@ static void setupHistogramView(QChartView*const view, QChart*const chart)
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
-    , ui(new Ui::MainWindow),
-      images(tabCount)
+    , ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
 
@@ -110,14 +104,12 @@ MainWindow::MainWindow(QWidget *parent)
             QString fileName = QFileDialog::getSaveFileName(this,tr("保存当前图片"),
                                                             QFileInfo(windowFilePath()).fileName(),
                                                             tr("图片 (*.png *.jpg *.jpeg *.bmp *.xpm)"));
+            QImage images[] = {origin,globalEnh,localEnh};// 注意：Tab页顺序依赖
             saveImage(images[ui->tabWidget->currentIndex()],fileName);
         });
         menu->addAction(tr("保存当前直方图"),[this]{
-            QList candidates = ui->tabWidget->currentWidget()->findChildren<QtCharts::QChartView*>();
-            // 注意：这里假定了每个Tab下都只有一个直方图的QChartView，如果后续有添加其它QChartView，则需要更精确的匹配模式
-            Q_ASSERT_X(!candidates.isEmpty(),__func__,"No Histogram View!");
-            auto current = candidates.first();
-            Q_CHECK_PTR(current);
+            QtCharts::QChartView* views[] = {ui->originHistView,ui->globalEnhHistView,ui->localEnhHistView};
+            auto current = views[ui->tabWidget->currentIndex()];// 注意：Tab页顺序依赖
             QImage image(current->rect().size(),QImage::Format_Grayscale8);
             QPainter painter(&image);
             current->render(&painter);
@@ -162,13 +154,10 @@ MainWindow::MainWindow(QWidget *parent)
     }
 
     { // 原图像视图
-        connect(this,&MainWindow::imageLoaded,[this](const QImage& image){
-            images.replace(originTabIndex,image);
-        });
         auto scene = new QGraphicsScene(this);
         auto item = scene->addPixmap(QPixmap(":/rc/icon/no-image.png"));
-        connect(this,&MainWindow::imageLoaded,[item](const QImage& image){
-            item->setPixmap(QPixmap::fromImage(image));
+        connect(this,&MainWindow::imageLoaded,[item,this]{
+            item->setPixmap(QPixmap::fromImage(origin));
         });
         ui->originView->setScene(scene);// TODO: 缩放
     }
@@ -177,8 +166,8 @@ MainWindow::MainWindow(QWidget *parent)
         auto chart = new QChart;
         setupHistogramView(ui->originHistView,chart);
         chart->setTitle(tr("原图像的灰度直方图"));
-        connect(this,&MainWindow::imageLoaded,[chart](const QImage& image){
-            updateHistogramChart(chart,histogram(image));
+        connect(this,&MainWindow::imageLoaded,[chart,this]{
+            updateHistogramChart(chart,histogram(origin));
         });
     }
     // TODO: 直方图均衡化、局部直方图统计增强
@@ -198,7 +187,8 @@ bool MainWindow::openImage(const QString &fileName)
         if (image.format()!=QImage::Format_Grayscale8) {
             ui->statusbar->showMessage(tr("警告：图像已被转换为灰度格式"),10000);
         }
-        emit imageLoaded(image.convertToFormat(QImage::Format_Grayscale8));
+        origin = image.convertToFormat(QImage::Format_Grayscale8);
+        emit imageLoaded();
         return true;
     } else {
         QMessageBox::critical(this,tr("读取图像失败！"),reader.errorString(),QMessageBox::Cancel);

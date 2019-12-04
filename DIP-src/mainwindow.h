@@ -17,7 +17,9 @@ public:
     ~MainWindow();
 
 signals:
-    void imageLoaded(const QImage& image);
+    void imageLoaded();
+    void globalEnhUpdate();
+    void localEnhUpdate();
 
 public slots:
     bool openImage(const QString& fileName);
@@ -29,6 +31,8 @@ protected:
 
 private:
     Ui::MainWindow *ui;
-    QVector<QImage> images;
+    QImage origin;
+    QImage globalEnh;
+    QImage localEnh;
 };
 #endif // MAINWINDOW_H
