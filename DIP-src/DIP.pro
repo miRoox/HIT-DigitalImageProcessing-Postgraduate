@@ -3,7 +3,7 @@
 TEMPLATE = app
 TARGET = DIP
 
-CONFIG(release, debug|release):  DESTDIR = ../release
+CONFIG(release, debug|release):  DESTDIR = ../bin
 
 VERSION = 0.5.0
 
