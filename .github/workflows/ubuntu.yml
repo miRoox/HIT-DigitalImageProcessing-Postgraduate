@@ -35,7 +35,7 @@ jobs:
           qmake
           make
       - name: Upload bin
-        if: startsWith(github.event.ref, 'refs/tags/')
+        # if: startsWith(github.event.ref, 'refs/tags/')
         uses: actions/upload-artifact@v1
         with:
           name: DIP-${{ matrix.os }}
