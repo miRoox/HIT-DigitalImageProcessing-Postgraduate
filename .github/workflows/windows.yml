@@ -19,8 +19,6 @@ jobs:
         qt_arch: [win64_msvc2017_64, win32_msvc2017]
     steps:
       - name: Install Qt
-        # 缓存未命中时才安装
-        if: steps.cacheqt.outputs.cache-hit != 'true'
         uses: jurplel/install-qt-action@v2.0.0
         with:
           arch: ${{ matrix.qt_arch }}
@@ -44,10 +42,3 @@ jobs:
           call "C:\Program Files (x86)\Microsoft Visual Studio\2019\Enterprise\VC\Auxiliary\Build\vcvars32.bat"
           qmake
           nmake
-      - name: CacheQt
-        uses: actions/cache@v1
-        # cache有大小限制，单个缓存不超过400M，整个仓库的缓存不超过2G。所以这里只缓存一个特定版本。
-        if: matrix.qt_arch == 'win64_msvc2017_64'
-        with:
-          path: ${{ env.Qt5_Dir }}
-          key: ${{ runner.OS }}-Qt-${{ matrix.qt_arch }}
