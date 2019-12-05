@@ -42,3 +42,9 @@ jobs:
           call "C:\Program Files (x86)\Microsoft Visual Studio\2019\Enterprise\VC\Auxiliary\Build\vcvars32.bat"
           qmake
           nmake
+      - name: Upload bin
+        if: startsWith(github.event.ref, 'refs/tags/')
+        uses: actions/upload-artifact@v1
+        with:
+          name: DIP-${{ matrix.qt_arch }}
+          path: bin
