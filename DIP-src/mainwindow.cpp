@@ -110,7 +110,7 @@ MainWindow::MainWindow(QWidget *parent)
         menu->addAction(tr("保存当前直方图"),[this]{
             QtCharts::QChartView* views[] = {ui->originHistView,ui->globalEnhHistView,ui->localEnhHistView};
             auto current = views[ui->tabWidget->currentIndex()];// 注意：Tab页顺序依赖
-            QImage image(current->rect().size(),QImage::Format_Grayscale8);
+            QImage image(current->rect().size(),QImage::Format_ARGB32);
             QPainter painter(&image);
             current->render(&painter);
             QFileInfo fileInfo(window()->windowFilePath());
