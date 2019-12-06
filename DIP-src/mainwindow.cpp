@@ -243,13 +243,13 @@ void MainWindow::saveImage(const QImage &image, const QString &fileName)
 
 static bool viewZoomByWheel(QGraphicsView* view, QWheelEvent* e)
 {
-    Q_UNUSED(view)
+    constexpr double ratio = 1.025;
     if (QApplication::keyboardModifiers() == Qt::ControlModifier)
     {
         if (e->delta() > 0) {
-            // zoom in
+            view->scale(ratio,ratio);
         } else {
-            // zoom out
+            view->scale(1/ratio,1/ratio);
         }
         return true;
     }
@@ -261,8 +261,7 @@ bool MainWindow::eventFilter(QObject *obj, QEvent *e)
     auto view = qobject_cast<QGraphicsView*>(obj);
     if (view) {
         if (e->type()==QEvent::Wheel) {
-            auto wheelEvent = static_cast<QWheelEvent*>(e);
-            return viewZoomByWheel(view,wheelEvent);
+            return viewZoomByWheel(view,static_cast<QWheelEvent*>(e));
         }
     }
     return QMainWindow::eventFilter(obj,e);
