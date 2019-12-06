@@ -22,6 +22,8 @@
 
 using namespace QtCharts;
 
+static constexpr double zoomRatio = 1.025;
+
 static QVector<QPointF> linePointsFromHistogram(const QVector<double>& hist)
 {
     QVector<QPointF> points;
@@ -167,7 +169,27 @@ MainWindow::MainWindow(QWidget *parent)
             });
             imageView->setScene(scene);
             imageView->setResizeAnchor(QGraphicsView::AnchorUnderMouse);
-            imageView->installEventFilter(this);// TODO: 缩放
+            auto addActionToView = [imageView](
+                    const QString& text,
+                    const QKeySequence& shortcut,
+                    auto&& functor){
+                auto action = new QAction(text,imageView);
+                action->setShortcut(shortcut);
+                action->setShortcutContext(Qt::WidgetWithChildrenShortcut);
+                imageView->connect(action,&QAction::triggered,functor);
+                imageView->addAction(action);
+            };
+            addActionToView(tr("放大"),QKeySequence::ZoomIn,[imageView]{
+                imageView->scale(zoomRatio,zoomRatio);
+            });
+            addActionToView(tr("缩小"),QKeySequence::ZoomOut,[imageView]{
+                imageView->scale(1/zoomRatio,1/zoomRatio);
+            });
+            addActionToView(tr("恢复实际大小"),QKeySequence(Qt::CTRL|Qt::Key_1),[imageView]{
+                imageView->resetTransform();
+            });
+            imageView->setContextMenuPolicy(Qt::ActionsContextMenu);
+            imageView->installEventFilter(this);
         }
         { // 直方图视图
             auto chart = new QChart;
@@ -243,13 +265,12 @@ void MainWindow::saveImage(const QImage &image, const QString &fileName)
 
 static bool viewZoomByWheel(QGraphicsView* view, QWheelEvent* e)
 {
-    constexpr double ratio = 1.025;
     if (QApplication::keyboardModifiers() == Qt::ControlModifier)
     {
         if (e->delta() > 0) {
-            view->scale(ratio,ratio);
+            view->scale(zoomRatio,zoomRatio);
         } else {
-            view->scale(1/ratio,1/ratio);
+            view->scale(1/zoomRatio,1/zoomRatio);
         }
         return true;
     }
