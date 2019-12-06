@@ -34,3 +34,12 @@ QImage equalizeHistogram(const QImage& image)
     }
     return out;
 }
+
+//! 局部统计增强
+QImage localStatisticalEnhance(const QImage &image, double k0, double k1, double k2, double m)
+{
+    Q_ASSERT_X(image.format()==QImage::Format_Grayscale8,__func__,"Non-grayscale");
+    Q_ASSERT_X(k0>0&&k0<1&&k1<k2&&m>1,__func__,"Invalid parameter");
+    QImage out(image.size(),QImage::Format_Grayscale8);
+    return out;
+}

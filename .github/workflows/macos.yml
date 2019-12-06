@@ -19,7 +19,6 @@ jobs:
         os: [macos-latest]
     steps:
       - name: Install Qt
-        if: steps.cacheqt.outputs.cache-hit != 'true'
         uses: jurplel/install-qt-action@v2.0.0
         with:
           modules: qtcharts
@@ -32,8 +31,10 @@ jobs:
           export PATH=$PATH:$Qt5_Dir
           qmake
           make
-      - name: CacheQt
-        uses: actions/cache@v1
+          macdeployqt ../bin/
+      - name: Upload bin
+        # if: startsWith(github.event.ref, 'refs/tags/')
+        uses: actions/upload-artifact@v1
         with:
-          path: ${{ env.Qt5_Dir }}
-          key: ${{ runner.OS }}-Qt
+          name: DIP-${{ matrix.os }}
+          path: bin
