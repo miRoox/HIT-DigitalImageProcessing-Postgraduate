@@ -138,7 +138,6 @@ MainWindow::MainWindow(QWidget *parent)
     }
 
     setAcceptDrops(true);
-    setWindowTitle(tr("数字图像处理 - 作业"));
 
     { // Splitter 同步
         auto syncSplitter = [this](const QSplitter* current)->auto{
