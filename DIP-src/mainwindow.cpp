@@ -108,7 +108,7 @@ MainWindow::MainWindow(QWidget *parent)
             saveImage(images[ui->tabWidget->currentIndex()],fileName);
         });
         menu->addAction(tr("保存当前直方图"),[this]{
-            QtCharts::QChartView* views[] = {ui->originHistView,ui->globalEnhHistView,ui->localEnhHistView};
+            QChartView* views[] = {ui->originHistView,ui->globalEnhHistView,ui->localEnhHistView};
             auto current = views[ui->tabWidget->currentIndex()];// 注意：Tab页顺序依赖
             QImage image(current->rect().size(),QImage::Format_ARGB32);
             QPainter painter(&image);
@@ -152,41 +152,33 @@ MainWindow::MainWindow(QWidget *parent)
         connect(ui->splitter_3,&QSplitter::splitterMoved,syncSplitter(ui->splitter_3));
     }
 
-    { // 原图像视图
-        auto scene = new QGraphicsScene(this);
-        auto item = scene->addPixmap(QPixmap(":/rc/icon/no-image.png"));
-        connect(this,&MainWindow::imageLoaded,[item,this]{
-            item->setPixmap(QPixmap::fromImage(origin));
-        });
-        ui->originView->setScene(scene);// TODO: 缩放
-    }
+    // 视图设置模板
+    auto setupViews = [this](
+            const QImage& image,
+            QGraphicsView* imageView,
+            QChartView* histView,
+            const QString& histTitle,
+            void (MainWindow::*signal)()){
+        { // 图像视图
+            auto scene = new QGraphicsScene(this);
+            auto item = scene->addPixmap(QPixmap(":/rc/icon/no-image.png"));
+            connect(this,signal,[item,&image]{
+                item->setPixmap(QPixmap::fromImage(image));
+            });
+            imageView->setScene(scene);// TODO: 缩放
+        }
+        { // 直方图视图
+            auto chart = new QChart;
+            setupHistogramView(histView,chart);
+            chart->setTitle(histTitle);
+            connect(this,signal,[chart,&image]{
+                updateHistogramChart(chart,histogram(image));
+            });
+        }
+    };
 
-    { // 原图像直方图视图
-        auto chart = new QChart;
-        setupHistogramView(ui->originHistView,chart);
-        chart->setTitle(tr("原图像的灰度直方图"));
-        connect(this,&MainWindow::imageLoaded,[chart,this]{
-            updateHistogramChart(chart,histogram(origin));
-        });
-    }
-
-    { // 全局直方图均衡化图像视图
-        auto scene = new QGraphicsScene(this);
-        auto item = scene->addPixmap(QPixmap(":/rc/icon/no-image.png"));
-        connect(this,&MainWindow::globalEnhUpdate,[item,this]{
-            item->setPixmap(QPixmap::fromImage(globalEnh));
-        });
-        ui->globalEnhView->setScene(scene);
-    }
-
-    { // 全局直方图均衡化图像直方图视图
-        auto chart = new QChart;
-        setupHistogramView(ui->globalEnhHistView,chart);
-        chart->setTitle(tr("全局直方图均衡化图像的灰度直方图"));
-        connect(this,&MainWindow::globalEnhUpdate,[chart,this]{
-            updateHistogramChart(chart,histogram(globalEnh));
-        });
-    }
+    setupViews(origin,ui->originView,ui->originHistView,tr("原图像的灰度直方图"),&MainWindow::imageLoaded);
+    setupViews(globalEnh,ui->globalEnhView,ui->globalEnhHistView,tr("全局直方图均衡化图像的灰度直方图"),&MainWindow::globalEnhUpdate);
     // TODO: 局部直方图统计增强
 
     connect(this,&MainWindow::imageLoaded,[this]{
