@@ -15,6 +15,8 @@
 #include <QFileDialog>
 #include <QFileInfo>
 #include <QMessageBox>
+#include <QApplication>
+#include <QClipboard>
 #include <QDragEnterEvent>
 #include <QDropEvent>
 #include <QMimeData>
@@ -70,6 +72,14 @@ static void setupHistogramView(QChartView*const view, QChart*const chart)
     view->setRenderHint(QPainter::Antialiasing);
 }
 
+static QImage renderGraphicsView(QGraphicsView*const view)
+{
+    QImage image(view->rect().size(),QImage::Format_ARGB32);
+    QPainter painter(&image);
+    view->render(&painter);
+    return image;
+}
+
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
     , ui(new Ui::MainWindow)
@@ -112,9 +122,7 @@ MainWindow::MainWindow(QWidget *parent)
         menu->addAction(tr("保存当前直方图"),[this]{
             QChartView* views[] = {ui->originHistView,ui->globalEnhHistView,ui->localEnhHistView};
             auto current = views[ui->tabWidget->currentIndex()];// 注意：Tab页顺序依赖
-            QImage image(current->rect().size(),QImage::Format_ARGB32);
-            QPainter painter(&image);
-            current->render(&painter);
+            QImage image = renderGraphicsView(current);
             QFileInfo fileInfo(window()->windowFilePath());
             QString path = fileInfo.baseName()+"-hist."+fileInfo.suffix();
             QString fileName = QFileDialog::getSaveFileName(this,tr("保存当前直方图"),path,
@@ -161,6 +169,18 @@ MainWindow::MainWindow(QWidget *parent)
             QChartView* histView,
             const QString& histTitle,
             void (MainWindow::*signal)()){
+        auto addActionTo = [](QWidget* widget)->auto{
+            return [widget](
+                    const QString& text,
+                    const QKeySequence& shortcut,
+                    auto&& functor){
+                auto action = new QAction(text,widget);
+                action->setShortcut(shortcut);
+                action->setShortcutContext(Qt::WidgetWithChildrenShortcut);
+                widget->connect(action,&QAction::triggered,functor);
+                widget->addAction(action);
+            };
+        };
         { // 图像视图
             auto scene = new QGraphicsScene(this);
             auto item = scene->addPixmap(QPixmap(":/rc/icon/no-image.png"));
@@ -169,16 +189,10 @@ MainWindow::MainWindow(QWidget *parent)
             });
             imageView->setScene(scene);
             imageView->setResizeAnchor(QGraphicsView::AnchorUnderMouse);
-            auto addActionToView = [imageView](
-                    const QString& text,
-                    const QKeySequence& shortcut,
-                    auto&& functor){
-                auto action = new QAction(text,imageView);
-                action->setShortcut(shortcut);
-                action->setShortcutContext(Qt::WidgetWithChildrenShortcut);
-                imageView->connect(action,&QAction::triggered,functor);
-                imageView->addAction(action);
-            };
+            auto addActionToView = addActionTo(imageView);
+            addActionToView(tr("复制"),QKeySequence::Copy,[&image]{
+                QApplication::clipboard()->setImage(image);
+            });
             addActionToView(tr("放大"),QKeySequence::ZoomIn,[imageView]{
                 imageView->scale(zoomRatio,zoomRatio);
             });
@@ -194,6 +208,10 @@ MainWindow::MainWindow(QWidget *parent)
         { // 直方图视图
             auto chart = new QChart;
             setupHistogramView(histView,chart);
+            addActionTo(histView)(tr("复制"),QKeySequence::Copy,[histView]{
+                QApplication::clipboard()->setImage(renderGraphicsView(histView));
+            });
+            histView->setContextMenuPolicy(Qt::ActionsContextMenu);
             chart->setTitle(histTitle);
             connect(this,signal,[chart,&image]{
                 updateHistogramChart(chart,histogram(image));
