@@ -11,8 +11,35 @@ on:
       - 'README.md'
       - 'LICENSE'
 jobs:
+  try_create_release:
+    name: Try create release
+    runs-on: ubuntu-latest
+    steps:
+    - name: Do nothing
+      run: echo nothing
+    - name: Create Release
+      if: startsWith(github.event.ref, 'refs/tags/')
+      id: create_release
+      uses: actions/create-release@v1.0.0
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        tag_name: ${{ github.ref }}
+        release_name: Release ${{ github.ref }}
+        draft: false
+        prerelease: false
+    - name: Output Release URL File
+      if: startsWith(github.event.ref, 'refs/tags/')
+      run: echo "${{ steps.create_release.outputs.upload_url }}" > release_url.txt
+    - name: Save Release URL File for publish
+      if: startsWith(github.event.ref, 'refs/tags/')
+      uses: actions/upload-artifact@v1
+      with:
+        name: release_url
+        path: release_url.txt
   windows:
     name: Build on Windows
+    needs: try_create_release
     runs-on: windows-latest
     strategy:
       matrix:
@@ -41,8 +68,40 @@ jobs:
           qmake
           nmake
           windeployqt ../bin/
+      - name: Package
+        if: startsWith(github.event.ref, 'refs/tags/')
+        shell: pwsh
+        run: Compress-Archive -Path bin ${{ matrix.qt_arch }}
+      - name: Load Release URL File from release job
+        if: startsWith(github.event.ref, 'refs/tags/')
+        uses: actions/download-artifact@v1
+        with:
+          name: release_url
+      - name: Get Release File Name & Upload URL
+        if: startsWith(github.event.ref, 'refs/tags/')
+        id: get_release_info
+        shell: bash
+        run: |
+          echo ::set-output name=file_name::DIP-${env:QT_ARCH}-${env:TAG_REF_NAME}
+          value = `cat release_url/release_url.txt`
+          echo ::set-output name=upload_url::$value
+        env:
+          TAG_REF_NAME: ${{ github.ref }}
+          QT_ARCH: ${{ matrix.qt_arch }}
+      - name: Upload Release Asset
+        if: startsWith(github.event.ref, 'refs/tags/')
+        id: upload-release-asset
+        uses: actions/upload-release-asset@v1.0.1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.get_release_info.outputs.upload_url }}
+          asset_path: ./${{ matrix.qt_arch }}.zip
+          asset_name: ${{ steps.get_release_info.outputs.file_name }}.zip
+          asset_content_type: application/zip
   macos:
     name: Build on MacOS
+    needs: try_create_release
     runs-on: macos-latest
     steps:
       - name: Install Qt
@@ -61,6 +120,7 @@ jobs:
           macdeployqt ../bin/DIP.app -verbose=1 -dmg
   ubuntu:
     name: Build on Ubuntu
+    needs: try_create_release
     runs-on: ubuntu-latest
     steps:
       - name: Install Qt
