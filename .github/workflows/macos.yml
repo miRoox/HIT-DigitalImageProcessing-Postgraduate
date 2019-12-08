@@ -31,7 +31,7 @@ jobs:
           export PATH=$PATH:$Qt5_Dir
           qmake
           make
-          macdeployqt ../bin/
+          macdeployqt ../bin/DIP.app -verbose=1 -dmg
       - name: Upload bin
         # if: startsWith(github.event.ref, 'refs/tags/')
         uses: actions/upload-artifact@v1
