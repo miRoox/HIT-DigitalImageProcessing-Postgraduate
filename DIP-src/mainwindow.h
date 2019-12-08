@@ -18,8 +18,8 @@ public:
 
 signals:
     void imageLoaded();
-    void globalEnhUpdate();
-    void localEnhUpdate();
+    void globalEnhUpdated();
+    void localEnhUpdated();
 
 public slots:
     bool openImage(const QString& fileName);

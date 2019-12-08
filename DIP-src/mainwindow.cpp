@@ -202,12 +202,12 @@ MainWindow::MainWindow(QWidget *parent)
     };
 
     setupViews(origin,ui->originView,ui->originHistView,tr("原图像的灰度直方图"),&MainWindow::imageLoaded);
-    setupViews(globalEnh,ui->globalEnhView,ui->globalEnhHistView,tr("全局直方图均衡化图像的灰度直方图"),&MainWindow::globalEnhUpdate);
+    setupViews(globalEnh,ui->globalEnhView,ui->globalEnhHistView,tr("全局直方图均衡化图像的灰度直方图"),&MainWindow::globalEnhUpdated);
     // TODO: 局部直方图统计增强
 
     connect(this,&MainWindow::imageLoaded,[this]{
         globalEnh = equalizeHistogram(origin);
-        emit globalEnhUpdate();
+        emit globalEnhUpdated();
     });
 }
 
