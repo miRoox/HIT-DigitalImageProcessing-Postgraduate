@@ -1,8 +1,6 @@
 # 2019秋 数字图像处理
 
-[![Windows Build Status](https://github.com/miRoox/HIT-DigitalImageProcessing-Postgraduate/workflows/Build%20on%20Windows/badge.svg)](https://github.com/miRoox/HIT-DigitalImageProcessing-Postgraduate/actions?query=workflow%3A%22Build+on+Windows%22)
-[![MacOS Build Status](https://github.com/miRoox/HIT-DigitalImageProcessing-Postgraduate/workflows/Build%20on%20MacOS/badge.svg)](https://github.com/miRoox/HIT-DigitalImageProcessing-Postgraduate/actions?query=workflow%3A%22Build+on+MacOS%22)
-[![Ubuntu Build Status](https://github.com/miRoox/HIT-DigitalImageProcessing-Postgraduate/workflows/Build%20on%20Ubuntu/badge.svg)](https://github.com/miRoox/HIT-DigitalImageProcessing-Postgraduate/actions?query=workflow%3A%22Build+on+Ubuntu%22)
+[![Windows Build Status](https://github.com/miRoox/HIT-DigitalImageProcessing-Postgraduate/workflows/Build%20Software/badge.svg)](https://github.com/miRoox/HIT-DigitalImageProcessing-Postgraduate/actions?query=workflow%3A%22Build+Software%22)
 [![Report Build Status](https://github.com/miRoox/HIT-DigitalImageProcessing-Postgraduate/workflows/Generate%20Report/badge.svg)](https://github.com/miRoox/HIT-DigitalImageProcessing-Postgraduate/actions?query=workflow%3A%22Generate+Report%22)
 
 ### 作业：局部统计特征增强

@@ -1,4 +1,4 @@
-name: Build on Windows
+name: Build Software
 on: 
   push:
     paths-ignore:
@@ -11,8 +11,8 @@ on:
       - 'README.md'
       - 'LICENSE'
 jobs:
-  build:
-    name: Build
+  windows:
+    name: Build on Windows
     runs-on: windows-latest
     strategy:
       matrix:
@@ -44,9 +44,40 @@ jobs:
           qmake
           nmake
           windeployqt ../bin/
-      - name: Upload bin
-        # if: startsWith(github.event.ref, 'refs/tags/')
-        uses: actions/upload-artifact@v1
+  macos:
+    name: Build on MacOS
+    runs-on: macos-latest
+    steps:
+      - name: Install Qt
+        uses: jurplel/install-qt-action@v2.0.0
         with:
-          name: DIP-${{ matrix.qt_arch }}
-          path: bin
+          modules: qtcharts
+      - uses: actions/checkout@v1
+        with:
+          fetch-depth: 1
+      - name: build macos
+        run: |
+          cd DIP-src
+          export PATH=$PATH:$Qt5_Dir
+          qmake
+          make
+          macdeployqt ../bin/DIP.app -verbose=1 -dmg
+  ubuntu:
+    name: Build on Ubuntu
+    runs-on: ubuntu-latest
+    steps:
+      - name: Install Qt
+        uses: jurplel/install-qt-action@v2.0.0
+        with:
+          modules: qtcharts
+      - name: ubuntu install GL library
+        run: sudo apt-get install -y libglew-dev libglfw3-dev
+      - uses: actions/checkout@v1
+        with:
+          fetch-depth: 1
+      - name: build ubuntu
+        run: |
+          cd DIP-src
+          export PATH=$PATH:$Qt5_Dir
+          qmake
+          make
