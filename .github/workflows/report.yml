@@ -1,16 +1,12 @@
-name: Build Report Document
-
+name: Generate Report
 on: 
   push:
     paths-ignore:
       - 'README.md'
       - 'LICENSE'
-
 jobs:
   build:
-
     runs-on: ubuntu-latest
-
     steps:
     - uses: actions/checkout@v1
     - name: Compile LaTeX document
@@ -32,4 +28,3 @@ jobs:
       with:
         name: report
         path: report/report
-    
