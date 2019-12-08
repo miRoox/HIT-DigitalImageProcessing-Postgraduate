@@ -82,8 +82,8 @@ jobs:
         id: get_release_info
         shell: bash
         run: |
-          echo ::set-output name=file_name::DIP-${env:QT_ARCH}-${env:TAG_REF_NAME}
-          value = `cat release_url/release_url.txt`
+          echo ::set-output name=file_name::DIP-${QT_ARCH##*/}-${TAG_REF_NAME##*/v}
+          value=`cat release_url/release_url.txt`
           echo ::set-output name=upload_url::$value
         env:
           TAG_REF_NAME: ${{ github.ref }}
