@@ -236,6 +236,12 @@ MainWindow::MainWindow(QWidget *parent)
             addActionToView(tr("复制"),QKeySequence::Copy,[&image]{
                 QApplication::clipboard()->setImage(image);
             });
+            addActionToView(tr("保存"),QKeySequence::Save,[&image,this]{
+                QString fileName = QFileDialog::getSaveFileName(this,tr("保存当前图片"),
+                                                                QFileInfo(windowFilePath()).fileName(),
+                                                                tr("图片 (*.png *.jpg *.jpeg *.bmp *.xpm)"));
+                saveImage(image,fileName);
+            });
             addActionToView(tr("放大"),QKeySequence::ZoomIn,[imageView]{
                 imageView->scale(zoomRatio,zoomRatio);
             });
@@ -251,8 +257,17 @@ MainWindow::MainWindow(QWidget *parent)
         { // 直方图视图
             auto chart = new QChart;
             setupHistogramView(histView,chart);
-            addActionTo(histView)(tr("复制"),QKeySequence::Copy,[histView]{
+            auto addActionToHistView = addActionTo(histView);
+            addActionToHistView(tr("复制"),QKeySequence::Copy,[histView]{
                 QApplication::clipboard()->setImage(renderGraphicsView(histView));
+            });
+            addActionToHistView(tr("保存"),QKeySequence::Save,[histView,this]{
+                QImage image = renderGraphicsView(histView);
+                QFileInfo fileInfo(window()->windowFilePath());
+                QString path = fileInfo.baseName()+"-hist."+fileInfo.suffix();
+                QString fileName = QFileDialog::getSaveFileName(this,tr("保存当前直方图"),path,
+                                                                tr("图片 (*.png *.jpg *.jpeg *.bmp *.xpm)"));
+                saveImage(image,fileName);
             });
             histView->setContextMenuPolicy(Qt::ActionsContextMenu);
             chart->setTitle(histTitle);
