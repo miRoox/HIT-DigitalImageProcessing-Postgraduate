@@ -160,8 +160,8 @@ MainWindow::MainWindow(QWidget *parent)
         panelLayout->addRow(tr("k&1:"),k1Slider);
         auto k2Slider = new LabeledSlider(0,1,0.05);
         panelLayout->addRow(tr("k&2:"),k2Slider);
-        auto mSlider = new LabeledSlider(1,10,0.5);
-        panelLayout->addRow(tr("&m:"),mSlider);
+        auto eSlider = new LabeledSlider(1,10,0.5);
+        panelLayout->addRow(tr("&E:"),eSlider);
         connect(k1Slider,&LabeledSlider::valueChanged,[k1Slider,k2Slider](double d){
             if (d>=k2Slider->value())
                 k1Slider->setValue(k2Slider->value());
