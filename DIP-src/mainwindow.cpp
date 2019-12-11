@@ -134,6 +134,17 @@ MainWindow::MainWindow(QWidget *parent)
         ui->toolBar->addWidget(saveBtn);
     }
 
+    { // 参数设置
+        auto settingBtn = new QToolButton;
+        settingBtn->setIcon(QIcon(":/rc/icon/settings"));
+        settingBtn->setCheckable(true);
+        auto settingAction = ui->toolBar->addWidget(settingBtn);
+        settingAction->setVisible(false);
+        connect(ui->tabWidget,&QTabWidget::currentChanged,[settingAction,this]{
+           settingAction->setVisible(ui->tabWidget->currentWidget()==ui->localEnhTab);
+        });
+    }
+
     { // “关于”按钮
         ui->toolBar->addAction(QIcon(":/rc/icon/information.png"),
                                tr("关于"),[this]{
