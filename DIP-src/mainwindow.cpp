@@ -1,5 +1,6 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
+#include "localenhsettingform.h"
 #include "algorithms.h"
 #include <QGraphicsScene>
 #include <QGraphicsPixmapItem>
@@ -139,16 +140,13 @@ MainWindow::MainWindow(QWidget *parent)
     }
 
     { // 参数设置
-        auto settingBtn = new QToolButton;
-        settingBtn->setText(tr("参数设置"));
-        settingBtn->setToolTip(tr("参数设置"));
-        settingBtn->setIcon(QIcon(":/rc/icon/settings"));
-        settingBtn->setCheckable(true);
-        auto settingAction = ui->toolBar->addWidget(settingBtn);
+        auto settingAction = new QAction(QIcon(":/rc/icon/settings"),tr("参数设置"));
+        settingAction->setCheckable(true);
         settingAction->setVisible(false);
         connect(ui->tabWidget,&QTabWidget::currentChanged,[settingAction,this]{
            settingAction->setVisible(ui->tabWidget->currentWidget()==ui->localEnhTab);
         });
+        ui->toolBar->addAction(settingAction);
     }
 
     { // “关于”按钮
