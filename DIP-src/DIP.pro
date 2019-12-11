@@ -27,12 +27,14 @@ DEFINES += QT_DEPRECATED_WARNINGS
 
 SOURCES += \
     algorithms.cpp \
+    labeledslider.cpp \
     localenhsettingform.cpp \
     main.cpp \
     mainwindow.cpp
 
 HEADERS += \
     algorithms.h \
+    labeledslider.h \
     localenhsettingform.h \
     mainwindow.h
 
