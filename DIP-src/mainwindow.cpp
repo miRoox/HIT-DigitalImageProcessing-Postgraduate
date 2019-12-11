@@ -88,6 +88,8 @@ MainWindow::MainWindow(QWidget *parent)
 
     { // “打开”按钮
         auto openBtn = new QToolButton;
+        openBtn->setText(tr("打开"));
+        openBtn->setToolTip(tr("打开"));
         openBtn->setIcon(QIcon(":/rc/icon/open.png"));
         auto menu = new QMenu;
         for (const QFileInfo& file : QDir(":/rc/test-images/").entryInfoList()) {
@@ -104,12 +106,14 @@ MainWindow::MainWindow(QWidget *parent)
             }
         });
         openBtn->setMenu(menu);
-        openBtn->setPopupMode(QToolButton::MenuButtonPopup);
+        openBtn->setPopupMode(QToolButton::InstantPopup);
         ui->toolBar->addWidget(openBtn);
     }
 
     { // “保存”按钮
         auto saveBtn = new QToolButton;
+        saveBtn->setText(tr("保存"));
+        saveBtn->setToolTip(tr("保存"));
         saveBtn->setIcon(QIcon(":/rc/icon/save.png"));
         auto menu = new QMenu;
         menu->addAction(tr("保存当前图片"),[this]{
@@ -130,12 +134,14 @@ MainWindow::MainWindow(QWidget *parent)
             saveImage(image,fileName);
         });
         saveBtn->setMenu(menu);
-        saveBtn->setPopupMode(QToolButton::MenuButtonPopup);
+        saveBtn->setPopupMode(QToolButton::InstantPopup);
         ui->toolBar->addWidget(saveBtn);
     }
 
     { // 参数设置
         auto settingBtn = new QToolButton;
+        settingBtn->setText(tr("参数设置"));
+        settingBtn->setToolTip(tr("参数设置"));
         settingBtn->setIcon(QIcon(":/rc/icon/settings"));
         settingBtn->setCheckable(true);
         auto settingAction = ui->toolBar->addWidget(settingBtn);
