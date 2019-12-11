@@ -1,6 +1,6 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
-#include "localenhsettingform.h"
+#include "labeledslider.h"
 #include "algorithms.h"
 #include <QGraphicsScene>
 #include <QGraphicsPixmapItem>
@@ -13,6 +13,7 @@
 #include <QToolButton>
 #include <QWidgetAction>
 #include <QMenu>
+#include <QFormLayout>
 #include <QImageReader>
 #include <QFileDialog>
 #include <QFileInfo>
@@ -151,7 +152,24 @@ MainWindow::MainWindow(QWidget *parent)
            settingAction->setVisible(ui->tabWidget->currentWidget()==ui->localEnhTab);
         });
         auto waction = new QWidgetAction(settingBtn);
-        auto panel = new LocalEnhSettingForm;
+        auto panel = new QWidget;
+        auto panelLayout = new QFormLayout(panel);
+        auto k0Slider = new LabeledSlider(0,1,0.05);
+        panelLayout->addRow(tr("k&0:"),k0Slider);
+        auto k1Slider = new LabeledSlider(0,1,0.05);
+        panelLayout->addRow(tr("k&1:"),k1Slider);
+        auto k2Slider = new LabeledSlider(0,1,0.05);
+        panelLayout->addRow(tr("k&2:"),k2Slider);
+        auto mSlider = new LabeledSlider(1,10,0.5);
+        panelLayout->addRow(tr("&m:"),mSlider);
+        connect(k1Slider,&LabeledSlider::valueChanged,[k1Slider,k2Slider](double d){
+            if (d>=k2Slider->value())
+                k1Slider->setValue(k2Slider->value());
+        });
+        connect(k2Slider,&LabeledSlider::valueChanged,[k1Slider,k2Slider](double d){
+            if (d<=k1Slider->value())
+                k2Slider->setValue(k1Slider->value());
+        });
         waction->setDefaultWidget(panel);
         auto menu = new QMenu;
         menu->addAction(waction);
