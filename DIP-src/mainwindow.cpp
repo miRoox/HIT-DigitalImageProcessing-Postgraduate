@@ -11,6 +11,7 @@
 #include <QtCharts/QChartView>
 #include <QPointF>
 #include <QToolButton>
+#include <QWidgetAction>
 #include <QMenu>
 #include <QImageReader>
 #include <QFileDialog>
@@ -140,13 +141,22 @@ MainWindow::MainWindow(QWidget *parent)
     }
 
     { // 参数设置
-        auto settingAction = new QAction(QIcon(":/rc/icon/settings"),tr("参数设置"));
-        settingAction->setCheckable(true);
+        auto settingBtn = new QToolButton;
+        settingBtn->setText(tr("参数设置"));
+        settingBtn->setToolTip(tr("参数设置"));
+        settingBtn->setIcon(QIcon(":/rc/icon/settings"));
+        auto settingAction = ui->toolBar->addWidget(settingBtn);
         settingAction->setVisible(false);
         connect(ui->tabWidget,&QTabWidget::currentChanged,[settingAction,this]{
            settingAction->setVisible(ui->tabWidget->currentWidget()==ui->localEnhTab);
         });
-        ui->toolBar->addAction(settingAction);
+        auto waction = new QWidgetAction(settingBtn);
+        auto panel = new LocalEnhSettingForm;
+        waction->setDefaultWidget(panel);
+        auto menu = new QMenu;
+        menu->addAction(waction);
+        settingBtn->setMenu(menu);
+        settingBtn->setPopupMode(QToolButton::InstantPopup);
     }
 
     { // “关于”按钮
