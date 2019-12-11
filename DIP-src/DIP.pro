@@ -27,14 +27,17 @@ DEFINES += QT_DEPRECATED_WARNINGS
 
 SOURCES += \
     algorithms.cpp \
+    localenhsettingform.cpp \
     main.cpp \
     mainwindow.cpp
 
 HEADERS += \
     algorithms.h \
+    localenhsettingform.h \
     mainwindow.h
 
 FORMS += \
+    localenhsettingform.ui \
     mainwindow.ui
 
 RESOURCES += \
