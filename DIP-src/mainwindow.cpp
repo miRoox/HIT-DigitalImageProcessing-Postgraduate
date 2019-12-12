@@ -113,6 +113,11 @@ MainWindow::MainWindow(QWidget *parent)
         ui->toolBar->addWidget(openBtn);
     }
 
+    connect(this,&MainWindow::imageLoaded,[this]{
+        globalEnh = equalizeHistogram(origin);
+        emit globalEnhUpdated();
+    });
+
     { // “保存”按钮
         auto saveBtn = new QToolButton;
         saveBtn->setText(tr("保存"));
@@ -154,6 +159,7 @@ MainWindow::MainWindow(QWidget *parent)
         auto waction = new QWidgetAction(settingBtn);
         auto panel = new QWidget;
         auto panelLayout = new QFormLayout(panel);
+
         auto k0Slider = new LabeledSlider(0,1,0.05);
         panelLayout->addRow(tr("k&0:"),k0Slider);
         auto k1Slider = new LabeledSlider(0,1,0.05);
@@ -170,6 +176,27 @@ MainWindow::MainWindow(QWidget *parent)
             if (d<=k1Slider->value())
                 k2Slider->setValue(k1Slider->value());
         });
+
+        // 硬编码的默认值
+        k0Slider->setValue(0.4);
+        k1Slider->setValue(0.02);
+        k2Slider->setValue(0.4);
+        eSlider->setValue(4);
+
+        auto updateLocalEnh = [this,k0Slider,k1Slider,k2Slider,eSlider](){
+            double k0 = k0Slider->value();
+            double k1 = k1Slider->value();
+            double k2 = k2Slider->value();
+            double E = eSlider->value();
+            localEnh = localStatisticalEnhance(origin,k0,k1,k2,E);
+            emit localEnhUpdated();
+        };
+        connect(k0Slider,&LabeledSlider::valueChanged,this,updateLocalEnh);
+        connect(k1Slider,&LabeledSlider::valueChanged,this,updateLocalEnh);
+        connect(k2Slider,&LabeledSlider::valueChanged,this,updateLocalEnh);
+        connect(eSlider,&LabeledSlider::valueChanged,this,updateLocalEnh);
+        connect(this,&MainWindow::imageLoaded,this,updateLocalEnh);
+
         waction->setDefaultWidget(panel);
         auto menu = new QMenu;
         menu->addAction(waction);
@@ -279,12 +306,7 @@ MainWindow::MainWindow(QWidget *parent)
 
     setupViews(origin,ui->originView,ui->originHistView,tr("原图像的灰度直方图"),&MainWindow::imageLoaded);
     setupViews(globalEnh,ui->globalEnhView,ui->globalEnhHistView,tr("全局直方图均衡化图像的灰度直方图"),&MainWindow::globalEnhUpdated);
-    // TODO: 局部直方图统计增强
-
-    connect(this,&MainWindow::imageLoaded,[this]{
-        globalEnh = equalizeHistogram(origin);
-        emit globalEnhUpdated();
-    });
+    setupViews(localEnh,ui->localEnhView,ui->localEnhHistView,tr("局部统计增强图像的灰度直方图"),&MainWindow::localEnhUpdated);
 }
 
 MainWindow::~MainWindow()
