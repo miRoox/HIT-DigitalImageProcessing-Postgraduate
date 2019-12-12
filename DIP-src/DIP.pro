@@ -42,6 +42,9 @@ FORMS += \
 RESOURCES += \
     asset.qrc
 
+win32: RC_ICONS = DIP.ico
+mac: ICON = DIP.icns
+
 #CONFIG(release, debug|release) {
 #      win32: QMAKE_POST_LINK += $$[QT_INSTALL_BINS]/windeployqt $$shell_path($$absolute_path($$DESTDIR))  $$escape_expand(\\n\\t)
 #      mac: QMAKE_POST_LINK += $$[QT_INSTALL_BINS]/macdeployqt $$shell_path($$absolute_path($$DESTDIR))  $$escape_expand(\\n\\t)
