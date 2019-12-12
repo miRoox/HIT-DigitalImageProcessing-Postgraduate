@@ -217,8 +217,6 @@ MainWindow::MainWindow(QWidget *parent)
         });
     }
 
-    setAcceptDrops(true);
-
     { // Splitter 同步
         auto syncSplitter = [this](const QSplitter* current)->auto{
             return [current,this]{
