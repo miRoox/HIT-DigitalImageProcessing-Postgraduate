@@ -4,7 +4,10 @@
         <file>icon/save.png</file>
         <file>icon/information.png</file>
         <file>icon/open.png</file>
-        <file>test-images/Tungsten.png</file>
         <file>icon/settings.png</file>
+        <file>test-images/tungsten.tif</file>
+        <file>test-images/pollen.tif</file>
+        <file>test-images/phobos.tif</file>
+        <file>test-images/square.tif</file>
     </qresource>
 </RCC>
