@@ -29,59 +29,10 @@ using namespace QtCharts;
 
 static constexpr double zoomRatio = 1.025;
 
-static QVector<QPointF> linePointsFromHistogram(const QVector<double>& hist)
-{
-    QVector<QPointF> points;
-    points.reserve(0x100*2);
-    for (int i=0;i<0x100;++i)
-    {
-        points << QPointF{1.0*i,hist[i]} << QPointF{1.0*(i+1),hist[i]};
-    }
-    return points;
-}
-
-static void updateHistogramChart(QChart*const chart, const QVector<double>& hist)
-{
-    auto series = qobject_cast<QAreaSeries*>(chart->series().first());
-    Q_CHECK_PTR(series);
-    auto line = series->upperSeries();
-    line->replace(linePointsFromHistogram(hist));
-    chart->axes(Qt::Vertical).first()->setMax(*std::max_element(hist.begin(),hist.end()));
-}
-
-static void setupHistogramView(QChartView*const view, QChart*const chart)
-{
-    QVector<double> hist(0x100,0);
-    auto lseries = new QLineSeries();
-    lseries->append(linePointsFromHistogram(hist).toList());
-    auto series = new QAreaSeries(lseries);
-    QPen pen(Qt::gray);
-    pen.setWidth(1);
-    series->setPen(pen);
-
-    QLinearGradient gradient(QPointF(0, 0), QPointF(1, 0));
-    gradient.setColorAt(0.0, Qt::black);
-    gradient.setColorAt(1.0, Qt::white);
-    gradient.setCoordinateMode(QGradient::ObjectBoundingMode);
-    series->setBrush(gradient);
-
-    chart->addSeries(series);
-    chart->legend()->hide();
-    chart->createDefaultAxes();
-    chart->axes(Qt::Horizontal).first()->setRange(0, 256);
-    chart->axes(Qt::Vertical).first()->setMin(0);
-
-    view->setChart(chart);
-    view->setRenderHint(QPainter::Antialiasing);
-}
-
-static QImage renderGraphicsView(QGraphicsView*const view)
-{
-    QImage image(view->rect().size(),QImage::Format_ARGB32);
-    QPainter painter(&image);
-    view->render(&painter);
-    return image;
-}
+static void updateHistogramChart(QChart*const chart, const QVector<double>& hist);
+static void setupHistogramView(QChartView*const view, QChart*const chart);
+static QImage renderGraphicsView(QGraphicsView*const view);
+static bool viewZoomByWheel(QGraphicsView* view, QWheelEvent* e);
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
@@ -111,12 +62,7 @@ MainWindow::MainWindow(QWidget *parent)
         openBtn->setMenu(menu);
         openBtn->setPopupMode(QToolButton::InstantPopup);
         ui->toolBar->addWidget(openBtn);
-    }
-
-    connect(this,&MainWindow::imageLoaded,[this]{
-        globalEnh = equalizeHistogram(origin);
-        emit globalEnhUpdated();
-    });
+    } // “打开”按钮
 
     { // “保存”按钮
         auto saveBtn = new QToolButton;
@@ -144,36 +90,25 @@ MainWindow::MainWindow(QWidget *parent)
         saveBtn->setMenu(menu);
         saveBtn->setPopupMode(QToolButton::InstantPopup);
         ui->toolBar->addWidget(saveBtn);
-    }
+    } // “保存”按钮
 
-    { // 参数设置
-        auto settingBtn = new QToolButton;
-        settingBtn->setText(tr("参数设置"));
-        settingBtn->setToolTip(tr("参数设置"));
-        settingBtn->setIcon(QIcon(":/rc/icon/settings"));
-        auto settingAction = ui->toolBar->addWidget(settingBtn);
-        settingAction->setVisible(false);
-        connect(ui->tabWidget,&QTabWidget::currentChanged,[settingAction,this]{
-           settingAction->setVisible(ui->tabWidget->currentWidget()==ui->localEnhTab);
-        });
-        auto waction = new QWidgetAction(settingBtn);
-        auto panel = new QWidget;
-        auto panelLayout = new QFormLayout(panel);
+    // 直方图均衡化
+    connect(this,&MainWindow::imageLoaded,[this]{
+        globalEnh = equalizeHistogram(origin);
+        emit globalEnhUpdated();
+    });
 
+    { // 参数设置（局部统计增强）
         auto k0Slider = new LabeledSlider(0,1,0.05);
-        panelLayout->addRow(tr("k&0:"),k0Slider);
         auto k1Slider = new LabeledSlider(0,1,0.05);
-        panelLayout->addRow(tr("k&1:"),k1Slider);
         auto k2Slider = new LabeledSlider(0,1,0.05);
-        panelLayout->addRow(tr("k&2:"),k2Slider);
-        auto eSlider = new LabeledSlider(1,10,0.5);
-        panelLayout->addRow(tr("&E:"),eSlider);
-        connect(k1Slider,&LabeledSlider::valueChanged,[k1Slider,k2Slider](double d){
-            if (d>=k2Slider->value())
+        auto eSlider = new LabeledSlider(1,9.99,0.5);
+        connect(k1Slider,&LabeledSlider::valueChanged, [k1Slider,k2Slider](double d){
+            if (d>=k2Slider->value()) // 确保k1≤k2
                 k1Slider->setValue(k2Slider->value());
         });
-        connect(k2Slider,&LabeledSlider::valueChanged,[k1Slider,k2Slider](double d){
-            if (d<=k1Slider->value())
+        connect(k2Slider,&LabeledSlider::valueChanged, [k1Slider,k2Slider](double d){
+            if (d<=k1Slider->value()) // 确保k1≤k2
                 k2Slider->setValue(k1Slider->value());
         });
 
@@ -183,7 +118,8 @@ MainWindow::MainWindow(QWidget *parent)
         k2Slider->setValue(0.4);
         eSlider->setValue(4);
 
-        auto updateLocalEnh = [this,k0Slider,k1Slider,k2Slider,eSlider](){
+        // 局部统计增强
+        auto updateLocalEnh = [this,k0Slider,k1Slider,k2Slider,eSlider]{
             double k0 = k0Slider->value();
             double k1 = k1Slider->value();
             double k2 = k2Slider->value();
@@ -191,18 +127,36 @@ MainWindow::MainWindow(QWidget *parent)
             localEnh = localStatisticalEnhance(origin,k0,k1,k2,E);
             emit localEnhUpdated();
         };
-        connect(k0Slider,&LabeledSlider::valueChanged,this,updateLocalEnh);
-        connect(k1Slider,&LabeledSlider::valueChanged,this,updateLocalEnh);
-        connect(k2Slider,&LabeledSlider::valueChanged,this,updateLocalEnh);
-        connect(eSlider,&LabeledSlider::valueChanged,this,updateLocalEnh);
-        connect(this,&MainWindow::imageLoaded,this,updateLocalEnh);
+        connect(k0Slider,&LabeledSlider::valueChanged,updateLocalEnh);
+        connect(k1Slider,&LabeledSlider::valueChanged,updateLocalEnh);
+        connect(k2Slider,&LabeledSlider::valueChanged,updateLocalEnh);
+        connect(eSlider,&LabeledSlider::valueChanged,updateLocalEnh);
+        connect(this,&MainWindow::imageLoaded,updateLocalEnh);
 
+        // 工具栏设置
+        auto settingBtn = new QToolButton;
+        settingBtn->setText(tr("参数设置"));
+        settingBtn->setToolTip(tr("参数设置"));
+        settingBtn->setIcon(QIcon(":/rc/icon/settings.png"));
+        auto settingAction = ui->toolBar->addWidget(settingBtn);
+        settingAction->setVisible(false);
+        connect(ui->tabWidget,&QTabWidget::currentChanged,[settingAction,this]{
+           // 仅当当前页为局部统计增强时显示
+           settingAction->setVisible(ui->tabWidget->currentWidget()==ui->localEnhTab);
+        });
+        auto waction = new QWidgetAction(settingBtn);
+        auto panel = new QWidget;
+        auto panelLayout = new QFormLayout(panel);
+        panelLayout->addRow(tr("k&0:"),k0Slider);
+        panelLayout->addRow(tr("k&1:"),k1Slider);
+        panelLayout->addRow(tr("k&2:"),k2Slider);
+        panelLayout->addRow(tr("&E:"),eSlider);
         waction->setDefaultWidget(panel);
         auto menu = new QMenu;
         menu->addAction(waction);
         settingBtn->setMenu(menu);
         settingBtn->setPopupMode(QToolButton::InstantPopup);
-    }
+    } // 参数设置
 
     { // “关于”按钮
         ui->toolBar->addAction(QIcon(":/rc/icon/information.png"),
@@ -215,7 +169,7 @@ MainWindow::MainWindow(QWidget *parent)
                                tr("<p>本程序基于<a href=\"https://www.qt.io/\">Qt</a>构建</p>")+
                                tr("<p>图标由<a href=\"https://www.flaticon.com/authors/good-ware\" title=\"Good Ware\">Good Ware</a>和<a href=\"https://www.flaticon.com/authors/freepik\" title=\"Freepik\">Freepik</a>制作</p>"));
         });
-    }
+    } // “关于”按钮
 
     { // Splitter 同步
         auto syncSplitter = [this](const QSplitter* current)->auto{
@@ -228,27 +182,31 @@ MainWindow::MainWindow(QWidget *parent)
         connect(ui->splitter_1,&QSplitter::splitterMoved,syncSplitter(ui->splitter_1));
         connect(ui->splitter_2,&QSplitter::splitterMoved,syncSplitter(ui->splitter_2));
         connect(ui->splitter_3,&QSplitter::splitterMoved,syncSplitter(ui->splitter_3));
-    }
+    } // Splitter 同步
 
     // 视图设置模板
     auto setupViews = [this](
-            const QImage& image,
-            QGraphicsView* imageView,
-            QChartView* histView,
-            const QString& histTitle,
-            void (MainWindow::*signal)()){
+            const QImage& image,            // 图像
+            QGraphicsView* imageView,       // 图像视图控件
+            QChartView* histView,           // 直方图视图控件
+            const QString& histTitle,       // 直方图标题
+            void (MainWindow::*signal)())   // 图像更新信号
+    {
+        // 向控件添加action
         auto addActionTo = [](QWidget* widget)->auto{
             return [widget](
-                    const QString& text,
-                    const QKeySequence& shortcut,
-                    auto&& functor){
+                    const QString& text,            // 文本
+                    const QKeySequence& shortcut,   // 快捷键
+                    auto&& functor)                 // 触发时的行为
+            {
                 auto action = new QAction(text,widget);
                 action->setShortcut(shortcut);
                 action->setShortcutContext(Qt::WidgetWithChildrenShortcut);
                 widget->connect(action,&QAction::triggered,functor);
                 widget->addAction(action);
             };
-        };
+        }; // 向控件添加action
+
         { // 图像视图
             auto scene = new QGraphicsScene(this);
             auto item = scene->addPixmap(QPixmap(":/rc/icon/no-image.png"));
@@ -278,7 +236,8 @@ MainWindow::MainWindow(QWidget *parent)
             });
             imageView->setContextMenuPolicy(Qt::ActionsContextMenu);
             imageView->installEventFilter(this);
-        }
+        } // 图像视图
+
         { // 直方图视图
             auto chart = new QChart;
             setupHistogramView(histView,chart);
@@ -299,9 +258,10 @@ MainWindow::MainWindow(QWidget *parent)
             connect(this,signal,[chart,&image]{
                 updateHistogramChart(chart,histogram(image));
             });
-        }
-    };
+        } // 直方图视图
+    }; // 视图设置模板
 
+    // 图像视图设置
     setupViews(origin,ui->originView,ui->originHistView,tr("原图像的灰度直方图"),&MainWindow::imageLoaded);
     setupViews(globalEnh,ui->globalEnhView,ui->globalEnhHistView,tr("全局直方图均衡化图像的灰度直方图"),&MainWindow::globalEnhUpdated);
     setupViews(localEnh,ui->localEnhView,ui->localEnhHistView,tr("局部统计增强图像的灰度直方图"),&MainWindow::localEnhUpdated);
@@ -359,20 +319,6 @@ void MainWindow::saveImage(const QImage &image, const QString &fileName)
     }
 }
 
-static bool viewZoomByWheel(QGraphicsView* view, QWheelEvent* e)
-{
-    if (QApplication::keyboardModifiers() == Qt::ControlModifier)
-    {
-        if (e->delta() > 0) {
-            view->scale(zoomRatio,zoomRatio);
-        } else {
-            view->scale(1/zoomRatio,1/zoomRatio);
-        }
-        return true;
-    }
-    return false;
-}
-
 bool MainWindow::eventFilter(QObject *obj, QEvent *e)
 {
     auto view = qobject_cast<QGraphicsView*>(obj);
@@ -404,4 +350,74 @@ void MainWindow::dropEvent(QDropEvent *e)
             }
         }
     }
+}
+
+// -- internal helper --
+
+static QVector<QPointF> linePointsFromHistogram(const QVector<double>& hist)
+{
+    QVector<QPointF> points;
+    points.reserve(0x100*2);
+    for (int i=0;i<0x100;++i)
+    {
+        points << QPointF{1.0*i,hist[i]} << QPointF{1.0*(i+1),hist[i]};
+    }
+    return points;
+}
+
+static void updateHistogramChart(QChart*const chart, const QVector<double>& hist)
+{
+    auto series = qobject_cast<QAreaSeries*>(chart->series().first());
+    Q_CHECK_PTR(series);
+    auto line = series->upperSeries();
+    line->replace(linePointsFromHistogram(hist));
+    chart->axes(Qt::Vertical).first()->setMax(*std::max_element(hist.begin(),hist.end()));
+}
+
+static void setupHistogramView(QChartView*const view, QChart*const chart)
+{
+    QVector<double> hist(0x100,0);
+    auto lseries = new QLineSeries();
+    lseries->append(linePointsFromHistogram(hist).toList());
+    auto series = new QAreaSeries(lseries);
+    QPen pen(Qt::gray);
+    pen.setWidth(1);
+    series->setPen(pen);
+
+    QLinearGradient gradient(QPointF(0, 0), QPointF(1, 0));
+    gradient.setColorAt(0.0, Qt::black);
+    gradient.setColorAt(1.0, Qt::white);
+    gradient.setCoordinateMode(QGradient::ObjectBoundingMode);
+    series->setBrush(gradient);
+
+    chart->addSeries(series);
+    chart->legend()->hide();
+    chart->createDefaultAxes();
+    chart->axes(Qt::Horizontal).first()->setRange(0, 256);
+    chart->axes(Qt::Vertical).first()->setMin(0);
+
+    view->setChart(chart);
+    view->setRenderHint(QPainter::Antialiasing);
+}
+
+static QImage renderGraphicsView(QGraphicsView*const view)
+{
+    QImage image(view->rect().size(),QImage::Format_ARGB32);
+    QPainter painter(&image);
+    view->render(&painter);
+    return image;
+}
+
+static bool viewZoomByWheel(QGraphicsView* view, QWheelEvent* e)
+{
+    if (QApplication::keyboardModifiers() == Qt::ControlModifier)
+    {
+        if (e->delta() > 0) {
+            view->scale(zoomRatio,zoomRatio);
+        } else {
+            view->scale(1/zoomRatio,1/zoomRatio);
+        }
+        return true;
+    }
+    return false;
 }
