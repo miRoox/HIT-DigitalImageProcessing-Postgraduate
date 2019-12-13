@@ -5,7 +5,7 @@ TARGET = DIP
 
 CONFIG(release, debug|release):  DESTDIR = ../bin
 
-VERSION = 0.5.3
+VERSION = 0.6.0
 
 QT       += core gui charts
 
