@@ -54,7 +54,7 @@ MainWindow::MainWindow(QWidget *parent)
         menu->addSeparator();
         menu->addAction(tr("从文件中打开"),[this]{
             QString fileName = QFileDialog::getOpenFileName(this,tr("打开图像"),".",
-                                                            tr("图片 (*.png *.jpg *.jpeg *.bmp *.xpm)"));
+                                                            tr("图片 (*.png *.jpg *.jpeg *.bmp *.xpm *.tif *tiff *.webp)"));
             if (!fileName.isEmpty()) {
                 openImage(fileName);
             }
@@ -73,7 +73,7 @@ MainWindow::MainWindow(QWidget *parent)
         menu->addAction(tr("保存当前图片"),[this]{
             QString fileName = QFileDialog::getSaveFileName(this,tr("保存当前图片"),
                                                             QFileInfo(windowFilePath()).fileName(),
-                                                            tr("图片 (*.png *.jpg *.jpeg *.bmp *.xpm)"));
+                                                            tr("图片 (*.png *.jpg *.jpeg *.bmp *.xpm *.tif *tiff *.webp)"));
             QImage images[] = {origin,globalEnh,localEnh};// 注意：Tab页顺序依赖
             saveImage(images[ui->tabWidget->currentIndex()],fileName);
         });
@@ -84,7 +84,7 @@ MainWindow::MainWindow(QWidget *parent)
             QFileInfo fileInfo(window()->windowFilePath());
             QString path = fileInfo.baseName()+"-hist."+fileInfo.suffix();
             QString fileName = QFileDialog::getSaveFileName(this,tr("保存当前直方图"),path,
-                                                            tr("图片 (*.png *.jpg *.jpeg *.bmp *.xpm)"));
+                                                            tr("图片 (*.png *.jpg *.jpeg *.bmp *.xpm *.tif *tiff *.webp)"));
             saveImage(image,fileName);
         });
         saveBtn->setMenu(menu);
@@ -222,7 +222,7 @@ MainWindow::MainWindow(QWidget *parent)
             addActionToView(tr("保存"),QKeySequence::Save,[&image,this]{
                 QString fileName = QFileDialog::getSaveFileName(this,tr("保存当前图片"),
                                                                 QFileInfo(windowFilePath()).fileName(),
-                                                                tr("图片 (*.png *.jpg *.jpeg *.bmp *.xpm)"));
+                                                                tr("图片 (*.png *.jpg *.jpeg *.bmp *.xpm *.tif *tiff *.webp)"));
                 saveImage(image,fileName);
             });
             addActionToView(tr("放大"),QKeySequence::ZoomIn,[imageView]{
@@ -250,7 +250,7 @@ MainWindow::MainWindow(QWidget *parent)
                 QFileInfo fileInfo(window()->windowFilePath());
                 QString path = fileInfo.baseName()+"-hist."+fileInfo.suffix();
                 QString fileName = QFileDialog::getSaveFileName(this,tr("保存当前直方图"),path,
-                                                                tr("图片 (*.png *.jpg *.jpeg *.bmp *.xpm)"));
+                                                                tr("图片 (*.png *.jpg *.jpeg *.bmp *.xpm *.tif *tiff *.webp)"));
                 saveImage(image,fileName);
             });
             histView->setContextMenuPolicy(Qt::ActionsContextMenu);
