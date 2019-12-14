@@ -3,11 +3,13 @@ on:
   push:
     paths-ignore:
       - 'report/**'
+      - 'matlab/**'
       - 'README.md'
       - 'LICENSE'
   pull_request:
     paths-ignore:
       - 'report/**'
+      - 'matlab/**'
       - 'README.md'
       - 'LICENSE'
 jobs:
