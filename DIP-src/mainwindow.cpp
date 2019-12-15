@@ -210,8 +210,11 @@ MainWindow::MainWindow(QWidget *parent)
         { // 图像视图
             auto scene = new QGraphicsScene(this);
             auto item = scene->addPixmap(QPixmap(":/rc/icon/no-image.png"));
-            connect(this,signal,[item,&image]{
+            connect(this,signal,[item,&image,imageView,scene]{
                 item->setPixmap(QPixmap::fromImage(image));
+                scene->setSceneRect(scene->itemsBoundingRect());
+                imageView->fitInView(scene->itemsBoundingRect(),Qt::KeepAspectRatio);
+                imageView->updateGeometry();
             });
             imageView->setScene(scene);
             imageView->setResizeAnchor(QGraphicsView::AnchorUnderMouse);
@@ -233,6 +236,9 @@ MainWindow::MainWindow(QWidget *parent)
             });
             addActionToView(tr("恢复实际大小"),QKeySequence(Qt::CTRL|Qt::Key_1),[imageView]{
                 imageView->resetTransform();
+            });
+            addActionToView(tr("适配视图大小"),QKeySequence(Qt::CTRL|Qt::Key_2),[imageView,scene]{
+                imageView->fitInView(scene->itemsBoundingRect(),Qt::KeepAspectRatio);
             });
             imageView->setContextMenuPolicy(Qt::ActionsContextMenu);
             imageView->installEventFilter(this);
