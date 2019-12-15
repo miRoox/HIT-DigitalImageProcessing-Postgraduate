@@ -195,6 +195,7 @@ MainWindow::MainWindow(QWidget *parent)
             const QImage& image,            // 图像
             QGraphicsView* imageView,       // 图像视图控件
             QChartView* histView,           // 直方图视图控件
+            QWidget* tab,                   // 对应Tab页
             const QString& histTitle,       // 直方图标题
             void (MainWindow::*signal)())   // 图像更新信号
     {
@@ -216,11 +217,14 @@ MainWindow::MainWindow(QWidget *parent)
         { // 图像视图
             auto scene = new QGraphicsScene(this);
             auto item = scene->addPixmap(QPixmap(":/rc/icon/no-image.png"));
-            connect(this,signal,[item,&image,imageView,scene]{
+            connect(this,signal,[item,&image,imageView,scene,this,tab]{
                 item->setPixmap(QPixmap::fromImage(image));
                 scene->setSceneRect(scene->itemsBoundingRect());
+                auto current = ui->tabWidget->currentWidget();//注意：QGraphicsView::fitInView在使用时必须处于显示状态才能成功
+                ui->tabWidget->setCurrentWidget(tab);
                 imageView->fitInView(scene->itemsBoundingRect(),Qt::KeepAspectRatio);
                 imageView->updateGeometry();
+                ui->tabWidget->setCurrentWidget(current);//还原当前的Tab页
             });
             imageView->setScene(scene);
             imageView->setResizeAnchor(QGraphicsView::AnchorUnderMouse);
@@ -274,9 +278,12 @@ MainWindow::MainWindow(QWidget *parent)
     }; // 视图设置模板
 
     // 图像视图设置
-    setupViews(origin,ui->originView,ui->originHistView,tr("原图像的灰度直方图"),&MainWindow::imageLoaded);
-    setupViews(globalEnh,ui->globalEnhView,ui->globalEnhHistView,tr("全局直方图均衡化图像的灰度直方图"),&MainWindow::globalEnhUpdated);
-    setupViews(localEnh,ui->localEnhView,ui->localEnhHistView,tr("局部统计增强图像的灰度直方图"),&MainWindow::localEnhUpdated);
+    setupViews(origin,ui->originView,ui->originHistView,ui->originTab,
+               tr("原图像的灰度直方图"),&MainWindow::imageLoaded);
+    setupViews(globalEnh,ui->globalEnhView,ui->globalEnhHistView,ui->globalEnhTab,
+               tr("全局直方图均衡化图像的灰度直方图"),&MainWindow::globalEnhUpdated);
+    setupViews(localEnh,ui->localEnhView,ui->localEnhHistView,ui->localEnhTab,
+               tr("局部统计增强图像的灰度直方图"),&MainWindow::localEnhUpdated);
 }
 
 MainWindow::~MainWindow()
