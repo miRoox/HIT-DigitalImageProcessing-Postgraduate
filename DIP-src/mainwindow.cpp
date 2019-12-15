@@ -103,6 +103,8 @@ MainWindow::MainWindow(QWidget *parent)
         auto k1Slider = new LabeledSlider(0,1,0.05);
         auto k2Slider = new LabeledSlider(0,1,0.05);
         auto eSlider = new LabeledSlider(1,9.99,0.5);
+        auto rSlider = new LabeledSlider(1,5,1);
+        rSlider->setDecimals(0);
         connect(k1Slider,&LabeledSlider::valueChanged, [k1Slider,k2Slider](double d){
             if (d>=k2Slider->value()) // 确保k1≤k2
                 k1Slider->setValue(k2Slider->value());
@@ -117,20 +119,23 @@ MainWindow::MainWindow(QWidget *parent)
         k1Slider->setValue(0.02);
         k2Slider->setValue(0.4);
         eSlider->setValue(4);
+        rSlider->setValue(1);
 
         // 局部统计增强
-        auto updateLocalEnh = [this,k0Slider,k1Slider,k2Slider,eSlider]{
+        auto updateLocalEnh = [this,k0Slider,k1Slider,k2Slider,eSlider,rSlider]{
             double k0 = k0Slider->value();
             double k1 = k1Slider->value();
             double k2 = k2Slider->value();
             double E = eSlider->value();
-            localEnh = localStatisticalEnhance(origin,k0,k1,k2,E);
+            uint r = static_cast<uint>(rSlider->value());
+            localEnh = localStatisticalEnhance(origin,k0,k1,k2,E,r);
             emit localEnhUpdated();
         };
         connect(k0Slider,&LabeledSlider::valueChanged,updateLocalEnh);
         connect(k1Slider,&LabeledSlider::valueChanged,updateLocalEnh);
         connect(k2Slider,&LabeledSlider::valueChanged,updateLocalEnh);
         connect(eSlider,&LabeledSlider::valueChanged,updateLocalEnh);
+        connect(rSlider,&LabeledSlider::valueChanged,updateLocalEnh);
         connect(this,&MainWindow::imageLoaded,updateLocalEnh);
 
         // 工具栏设置
@@ -151,6 +156,7 @@ MainWindow::MainWindow(QWidget *parent)
         panelLayout->addRow(tr("k&1:"),k1Slider);
         panelLayout->addRow(tr("k&2:"),k2Slider);
         panelLayout->addRow(tr("&E:"),eSlider);
+        panelLayout->addRow(tr("&r:"),rSlider);
         waction->setDefaultWidget(panel);
         auto menu = new QMenu;
         menu->addAction(waction);

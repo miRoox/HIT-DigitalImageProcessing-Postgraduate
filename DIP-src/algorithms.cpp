@@ -37,10 +37,10 @@ QImage equalizeHistogram(const QImage& image)
 
 //! 局部统计增强
 QImage localStatisticalEnhance(const QImage &image,
-                               double k0, double k1, double k2, double e)
+                               double k0, double k1, double k2, double e, uint r)
 {
     Q_ASSERT_X(image.format()==QImage::Format_Grayscale8,__func__,"Non-grayscale");
-    Q_ASSERT_X(k0>=0&&k0<=1&&k1<=k2&&e>=1,__func__,"Invalid parameter");
+    Q_ASSERT_X(k0>=0&&k0<=1&&k1<=k2&&e>=1&&r>=1,__func__,"Invalid parameter");
     QImage out(image.size(),QImage::Format_Grayscale8);
     out = image;//Do nothing; TODO: implement
     return out;
