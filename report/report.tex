@@ -62,7 +62,7 @@
     p_s(s)=\frac{1}{L-1}
 \end{equation}
 
-将式\eqref{eq:hist-eql-target}代入式\eqref{eq:cdf-eq}，即可得到
+将式~\eqref{eq:hist-eql-target} 代入式~\eqref{eq:cdf-eq}，即可得到
 \begin{equation}\label{eq:hist-eql-cont}
     s=T(r)=(L-1)\int_0^r p_r(r')\dd{r'}
 \end{equation}
@@ -73,15 +73,39 @@
     p_r\qty(r_k)=n_k/n\qc{k=0,1,\cdots,L-1}
 \end{equation}
 其中，$n$为图像总像素数，$n_k$是灰度为$r_k$的像素个数，$L$是图像可能的灰度级数目。
-从而可以给出式\eqref{eq:hist-eql-cont}的离散形式
+从而可以给出式~\eqref{eq:hist-eql-cont} 的离散形式
 \begin{equation}
     s_k=T\qty(r_k)=(L-1)\sum_{j=0}^k p_r(r_j)=\frac{L-1}{n}\sum_{j=0}^k n_j\qc{k=0,1,\cdots,L-1}
 \end{equation}
 变换$T(r_k)$即\emph{直方图均衡化}。
 
-\subsection{局部直方图增强}
+\subsection{基于局部统计特征的增强}
 
-\todo
+在某些情况下，我们需要在增强暗色区域的同时尽可能保持明亮区域不变，因为明亮区域并不需要增强。
+为了解决这类问题，需要一种能分辨亮区域和暗区域的不同，并只增强暗区域的方法。
+
+为了表征一个点$(x,y)$局部的亮暗，可以用将局部灰度平均值$m_{S_{x,y}}$同整个图像的全局灰度平均值$m_G$进行比较：
+如果$m_{S_{x,y}}\le k_0m_G$，其中$k_0$是一个小于$1$的正的常数，那么我们将把点$(x,y)$处的像素考虑为处理的候选点。
+
+因为我们的目标在于增强低对比度的感兴趣区域，所以还需要一种方法来判定一个区域是否可以作为增强的候选点。
+图像或者区域的对比度可以用标准差来衡量。
+因此，如果$\sigma_{S_{x,y}}\le k_2\sigma_G$，则认为点$(x,y)$处的像素是增强的候选点。
+其中，$\sigma_G$和$\sigma_{S_{x,y}}$分别为图像全局灰度标准差和局部灰度标准差，$k_2$为正的常数。
+如果我们感兴趣的区域是亮区域，则该常数应当大于$1$；相反，如果对暗区域感兴趣，则该常数应当小于$1$。
+
+最后，我们需要限制能接受的最低的对比度值，否则该方法会试图增强标准差为零的恒定区域（如背景）。
+因此，我们通过要求$k_1\sigma_G\le\sigma_{S_{x,y}}, k_1<k_2$，对局部标准差设置一个较低的阈值。
+满足上述所有局部增强条件的像素点，可以通过将像素值乘以一个指定常数$E$来处理，而不满足条件的像素则保持不变。
+
+综合上面的描述，基于局部统计特征的增强方法可以总结如下：
+令$f(x,y)$表示在图像任意坐标$(x,y)$处的像素值，而令$g(x,y)$表示增强图像的对应点像素值，
+则对于$x=0,1,\cdots,M-1,\,y=0,1,\cdots,N-1$，有
+\begin{equation}\label{eq:local-enh}
+    g(x,y)=\begin{cases}
+        E\cdot f(x,y) & m_{S_{x,y}}\le m_G\,\text{且}\,k_1\sigma_G\le\sigma_{S_{x,y}}\le k_2\sigma_G\\
+        f(x,y) & \text{其它}
+    \end{cases}
+\end{equation}
 
 \section{算法步骤}
 
