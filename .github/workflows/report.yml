@@ -17,13 +17,11 @@ jobs:
           args: -xelatex
           extra_system_packages: "py-pygments"
     - name: Copy document
-      if: startsWith(github.event.ref, 'refs/tags/')
       run: |
         cd report
         mkdir report
         cp out/report.pdf report/report.pdf
     - name: Upload document
-      if: startsWith(github.event.ref, 'refs/tags/')
       uses: actions/upload-artifact@v1
       with:
         name: report
