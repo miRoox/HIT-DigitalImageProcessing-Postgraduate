@@ -128,7 +128,7 @@ MainWindow::MainWindow(QWidget *parent)
             double k1 = k1Slider->value();
             double k2 = k2Slider->value();
             double E = eSlider->value();
-            uint r = static_cast<uint>(rSlider->value());
+            int r = static_cast<int>(rSlider->value());
             localEnh = localStatisticalEnhance(origin,k0,k1,k2,E,r);
             emit localEnhUpdated();
         };
