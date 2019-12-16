@@ -218,7 +218,10 @@ MainWindow::MainWindow(QWidget *parent)
             auto scene = new QGraphicsScene(this);
             auto item = scene->addPixmap(QPixmap(":/rc/icon/no-image.png"));
             connect(this,signal,[item,&image,imageView,scene,this,tab]{
+                QSize lastSize = item->pixmap().size();
                 item->setPixmap(QPixmap::fromImage(image));
+                if (lastSize==image.size())
+                    return;
                 scene->setSceneRect(scene->itemsBoundingRect());
                 auto current = ui->tabWidget->currentWidget();//注意：QGraphicsView::fitInView在使用时必须处于显示状态才能成功
                 ui->tabWidget->setCurrentWidget(tab);
