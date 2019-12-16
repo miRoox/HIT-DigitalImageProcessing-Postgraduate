@@ -23,13 +23,15 @@ QImage equalizeHistogram(const QImage& image)
 {
     Q_ASSERT_X(image.format()==QImage::Format_Grayscale8,__func__,"Non-grayscale");
     QImage out(image.size(),QImage::Format_Grayscale8);
-    QVector<double> hist_map = histogram(image);
-    std::partial_sum(hist_map.cbegin(),hist_map.cend(),hist_map.begin());
+    QVector<double> histMap = histogram(image);
+    std::partial_sum(histMap.cbegin(),histMap.cend(),histMap.begin());
+    std::transform(histMap.cbegin(),histMap.cend(),histMap.begin(),
+                   [](double c)->double{return std::lround(UINT8_MAX*c);});
     for (int y=0; y<image.height(); ++y) {
         const uint8_t* line = image.scanLine(y);
-        uint8_t* out_line = out.scanLine(y);
+        uint8_t* outLine = out.scanLine(y);
         for (int x=0; x<image.width(); ++x) {
-            out_line[x] = static_cast<uint8_t>(std::lround(0xff*hist_map[line[x]]));
+            outLine[x] = static_cast<uint8_t>(histMap[line[x]]);
         }
     }
     return out;
@@ -45,24 +47,25 @@ QImage localStatisticalEnhance(const QImage &image,
     const int width = image.width();
     const int height = image.height();
     const int size = width*height;
-    double g_mean = 0;
-    double g_std = 0;
+    double gMean = 0;
+    double gMean2 = 0;
     for (int y=0; y<height; ++y) {
         const uint8_t* line = image.scanLine(y);
         for (int x=0; x<width; ++x) {
-            g_mean += line[x];
-            g_std += line[x]*line[x];
+            gMean += line[x];
+            gMean2 += line[x]*line[x];
         }
     }
-    g_mean /= size;
-    g_std = std::sqrt(g_std/size-g_mean*g_mean); // D(x)=E(x^2)-E(x)^2
+    gMean /= size;
+    gMean2 /= size;
+    double gStd = std::sqrt(gMean2-gMean*gMean); // D(x)=E(x^2)-E(x)^2
     for (int y=0; y<height; ++y) {
         const uint8_t* line = image.scanLine(y);
-        uint8_t* out_line = out.scanLine(y);
+        uint8_t* outLine = out.scanLine(y);
         for (int x=0; x<width; ++x) {
-            double l_mean = 0;
-            double l_std = 0;
-            uint l_size = 0;
+            double lMean = 0;
+            double lMean2 = 0;
+            uint lSize = 0;
             for (int dy=-r; dy<r; ++dy) {
                 const int yy = y+dy;
                 if (yy<0 || yy>=height)
@@ -72,14 +75,15 @@ QImage localStatisticalEnhance(const QImage &image,
                     const int xx = x+dx;
                     if (xx<0 || x>=width)
                         continue;
-                    l_mean += line[xx];
-                    l_std += line[xx]*line[xx];
-                    l_size += 1;
+                    lMean += line[xx];
+                    lMean2 += line[xx]*line[xx];
+                    lSize += 1;
                 }
             }
-            l_mean /= l_size;
-            l_std = std::sqrt(l_std/l_size-l_mean*l_mean); // D(x)=E(x^2)-E(x)^2
-            out_line[x] = l_mean<=k0*g_mean && l_std>=k1*g_std && l_std<=k2*g_std
+            lMean /= lSize;
+            lMean2 /= lSize;
+            double lStd = std::sqrt(lMean2-lMean*lMean); // D(x)=E(x^2)-E(x)^2
+            outLine[x] = lMean<=k0*gMean && lStd>=k1*gStd && lStd<=k2*gStd
                         ? static_cast<uint8_t>(std::clamp(e*line[x],0.,1.*UINT8_MAX))
                         : line[x];
         }
