@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>800</width>
+    <width>1200</width>
     <height>600</height>
    </rect>
   </property>
@@ -33,8 +33,22 @@
           <property name="orientation">
            <enum>Qt::Horizontal</enum>
           </property>
-          <widget class="QGraphicsView" name="originView"/>
-          <widget class="QtCharts::QChartView" name="originHistView"/>
+          <widget class="QGraphicsView" name="originView">
+           <property name="contextMenuPolicy">
+            <enum>Qt::ActionsContextMenu</enum>
+           </property>
+           <property name="transformationAnchor">
+            <enum>QGraphicsView::AnchorUnderMouse</enum>
+           </property>
+           <property name="viewportUpdateMode">
+            <enum>QGraphicsView::BoundingRectViewportUpdate</enum>
+           </property>
+          </widget>
+          <widget class="QtCharts::QChartView" name="originHistView">
+           <property name="contextMenuPolicy">
+            <enum>Qt::ActionsContextMenu</enum>
+           </property>
+          </widget>
          </widget>
         </item>
        </layout>
@@ -49,8 +63,22 @@
           <property name="orientation">
            <enum>Qt::Horizontal</enum>
           </property>
-          <widget class="QGraphicsView" name="globalEnhView"/>
-          <widget class="QtCharts::QChartView" name="globalEnhHistView"/>
+          <widget class="QGraphicsView" name="globalEnhView">
+           <property name="contextMenuPolicy">
+            <enum>Qt::ActionsContextMenu</enum>
+           </property>
+           <property name="transformationAnchor">
+            <enum>QGraphicsView::AnchorUnderMouse</enum>
+           </property>
+           <property name="viewportUpdateMode">
+            <enum>QGraphicsView::BoundingRectViewportUpdate</enum>
+           </property>
+          </widget>
+          <widget class="QtCharts::QChartView" name="globalEnhHistView">
+           <property name="contextMenuPolicy">
+            <enum>Qt::ActionsContextMenu</enum>
+           </property>
+          </widget>
          </widget>
         </item>
        </layout>
@@ -65,8 +93,22 @@
           <property name="orientation">
            <enum>Qt::Horizontal</enum>
           </property>
-          <widget class="QGraphicsView" name="localEnhView"/>
-          <widget class="QtCharts::QChartView" name="localEnhHistView"/>
+          <widget class="QGraphicsView" name="localEnhView">
+           <property name="contextMenuPolicy">
+            <enum>Qt::ActionsContextMenu</enum>
+           </property>
+           <property name="transformationAnchor">
+            <enum>QGraphicsView::AnchorUnderMouse</enum>
+           </property>
+           <property name="viewportUpdateMode">
+            <enum>QGraphicsView::BoundingRectViewportUpdate</enum>
+           </property>
+          </widget>
+          <widget class="QtCharts::QChartView" name="localEnhHistView">
+           <property name="contextMenuPolicy">
+            <enum>Qt::ActionsContextMenu</enum>
+           </property>
+          </widget>
          </widget>
         </item>
        </layout>

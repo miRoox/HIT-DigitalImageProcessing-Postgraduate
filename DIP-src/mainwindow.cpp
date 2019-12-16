@@ -2,6 +2,7 @@
 #include "ui_mainwindow.h"
 #include "labeledslider.h"
 #include "algorithms.h"
+#include <algorithm>
 #include <QGraphicsScene>
 #include <QGraphicsPixmapItem>
 #include <QtCharts/QChart>
@@ -225,12 +226,15 @@ MainWindow::MainWindow(QWidget *parent)
                 scene->setSceneRect(scene->itemsBoundingRect());
                 auto current = ui->tabWidget->currentWidget();//注意：QGraphicsView::fitInView在使用时必须处于显示状态才能成功
                 ui->tabWidget->setCurrentWidget(tab);
+                auto splitter = tab->findChild<QSplitter*>();
+                Q_CHECK_PTR(splitter);
+                int prefSize = std::min(image.width(),splitter->height()); // 更换图像的时候调整显示区域尺寸
+                splitter->setSizes({prefSize,splitter->width()-prefSize});
                 imageView->fitInView(scene->itemsBoundingRect(),Qt::KeepAspectRatio);
                 imageView->updateGeometry();
                 ui->tabWidget->setCurrentWidget(current);//还原当前的Tab页
             });
             imageView->setScene(scene);
-            imageView->setResizeAnchor(QGraphicsView::AnchorUnderMouse);
             auto addActionToView = addActionTo(imageView);
             addActionToView(tr("复制"),QKeySequence::Copy,[&image]{
                 QApplication::clipboard()->setImage(image);
@@ -253,7 +257,6 @@ MainWindow::MainWindow(QWidget *parent)
             addActionToView(tr("适配视图大小"),QKeySequence(Qt::CTRL|Qt::Key_2),[imageView,scene]{
                 imageView->fitInView(scene->itemsBoundingRect(),Qt::KeepAspectRatio);
             });
-            imageView->setContextMenuPolicy(Qt::ActionsContextMenu);
             imageView->installEventFilter(this);
         } // 图像视图
 
@@ -272,7 +275,6 @@ MainWindow::MainWindow(QWidget *parent)
                                                                 tr("图片 (*.png *.jpg *.jpeg *.bmp *.xpm *.tif *tiff *.webp)"));
                 saveImage(image,fileName);
             });
-            histView->setContextMenuPolicy(Qt::ActionsContextMenu);
             chart->setTitle(histTitle);
             connect(this,signal,[chart,&image]{
                 updateHistogramChart(chart,histogram(image));
