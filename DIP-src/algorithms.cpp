@@ -1,6 +1,7 @@
 #include "algorithms.h"
 #include <cmath>
 #include <numeric>
+#include <tuple>
 
 //! 计算图像直方图数据
 QVector<double> histogram(const QImage& image)
@@ -46,43 +47,33 @@ QImage localStatisticalEnhance(const QImage &image,
     QImage out(image.size(),QImage::Format_Grayscale8);
     const int width = image.width();
     const int height = image.height();
-    const int size = width*height;
-    double gMean = 0;
-    double gMean2 = 0;
-    for (int y=0; y<height; ++y) {
-        const uint8_t* line = image.scanLine(y);
-        for (int x=0; x<width; ++x) {
-            gMean += line[x];
-            gMean2 += line[x]*line[x];
+    auto evalMeanStd = [=,&image](int xl, int xh, int yl, int yh)->auto {
+        uint size = 0;
+        double mean = 0;
+        double mean2 = 0;
+        for (int y=yl; y<=yh; ++y) {
+            if (y<0 || y>=height)
+                continue;
+            const uint8_t* line = image.scanLine(y);
+            for (int x=xl; x<=xh; ++x) {
+                if (x<0 || x>=width)
+                    continue;
+                size  += 1;
+                mean  += line[x];
+                mean2 += line[x]*line[x];
+            }
         }
-    }
-    gMean /= size;
-    gMean2 /= size;
-    double gStd = std::sqrt(gMean2-gMean*gMean); // D(x)=E(x^2)-E(x)^2
+        mean  /= size;
+        mean2 /= size;
+        double stdv = std::sqrt(mean2-mean*mean); // D(x)=E(x^2)-E(x)^2
+        return std::make_tuple(mean,stdv);
+    };
+    const auto [gMean, gStd] = evalMeanStd(0, width-1, 0, height-1);
     for (int y=0; y<height; ++y) {
         const uint8_t* line = image.scanLine(y);
         uint8_t* outLine = out.scanLine(y);
         for (int x=0; x<width; ++x) {
-            double lMean = 0;
-            double lMean2 = 0;
-            uint lSize = 0;
-            for (int dy=-r; dy<r; ++dy) {
-                const int yy = y+dy;
-                if (yy<0 || yy>=height)
-                    continue;
-                const uint8_t* line = image.scanLine(yy);
-                for (int dx=-r; dx<r; ++dx) {
-                    const int xx = x+dx;
-                    if (xx<0 || x>=width)
-                        continue;
-                    lMean += line[xx];
-                    lMean2 += line[xx]*line[xx];
-                    lSize += 1;
-                }
-            }
-            lMean /= lSize;
-            lMean2 /= lSize;
-            double lStd = std::sqrt(lMean2-lMean*lMean); // D(x)=E(x^2)-E(x)^2
+            const auto [lMean, lStd] = evalMeanStd(x-r, x+r, y-r, y+r);
             outLine[x] = lMean<=k0*gMean && lStd>=k1*gStd && lStd<=k2*gStd
                         ? static_cast<uint8_t>(std::clamp(e*line[x],0.,1.*UINT8_MAX))
                         : line[x];
