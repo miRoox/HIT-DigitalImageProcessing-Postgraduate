@@ -3,6 +3,8 @@
 \usepackage{graphicx}
 \usepackage{amsmath}
 \usepackage{physics}
+\usepackage{caption}
+\usepackage{tikz}
 \usepackage[outputdir={out}]{minted}% 代码高亮，需要Pygments
 \usepackage{url}
 
@@ -108,6 +110,23 @@
 \end{equation}
 
 \section{算法步骤}
+
+\subsection{直方图均衡化}
+
+首先计算图像的直方图分布，再根据直方图求灰度的累积分布，
+利用累积分布建立均衡化的变换映射，将这一变换作用到图像的每个像素上即为所求。
+算法流程如图~\ref{fig:hist-eq-flowchart} 所示。
+
+\begin{figure}[!htb]
+    \centering
+    \todo
+    \caption{直方图均衡化算法流程图}
+    \label{fig:hist-eq-flowchart}
+\end{figure}
+
+\subsection{基于局部统计特征的增强}
+
+首先计算图像的全局均值和标准差。
 
 \todo
 
