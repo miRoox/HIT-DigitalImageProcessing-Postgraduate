@@ -25,6 +25,7 @@ QImage equalizeHistogram(const QImage& image)
     Q_ASSERT_X(image.format()==QImage::Format_Grayscale8,__func__,"Non-grayscale");
     QImage out(image.size(),QImage::Format_Grayscale8);
     QVector<double> histMap = histogram(image);
+    // $s_k=T\qty(r_k)=(L-1)\sum_{j=0}^k p_r(r_j)$
     std::partial_sum(histMap.cbegin(),histMap.cend(),histMap.begin());
     std::transform(histMap.cbegin(),histMap.cend(),histMap.begin(),
                    [](double c)->double{return std::lround(UINT8_MAX*c);});
@@ -65,7 +66,7 @@ QImage localStatisticalEnhance(const QImage &image,
         }
         mean  /= size;
         mean2 /= size;
-        double stdv = std::sqrt(mean2-mean*mean); // D(x)=E(x^2)-E(x)^2
+        double stdv = std::sqrt(mean2-mean*mean); // $D(x)=E(x^2)-E(x)^2$
         return std::make_tuple(mean,stdv);
     };
     const auto [gMean, gStd] = evalMeanStd(0, width-1, 0, height-1);
