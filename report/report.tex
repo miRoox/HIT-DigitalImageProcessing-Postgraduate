@@ -8,6 +8,8 @@
 \usepackage[outputdir={out}]{minted}% 代码高亮，需要Pygments
 \usepackage{url}
 
+\usetikzlibrary{shapes,arrows,chains}
+
 \hitgsrepset{
     author={李，陈，卢，李，李}, % 学生姓名
     studentid={19SXXXXXX}, % 学号
@@ -119,7 +121,30 @@
 
 \begin{figure}[!htb]
     \centering
-    \todo
+    \begin{tikzpicture}[%
+        >=triangle 60,                  % Nice arrows; your taste may be different
+        start chain=going below,        % General flow is top-to-bottom
+        node distance=6mm and 60mm,     % Global setup of box spacing
+        every join/.style={->, draw},   % Default linetype for connecting boxes
+        ]
+    % ------------------------------------------------- 
+    % A few box styles 
+    % <on chain> *and* <on grid> reduce the need for manual relative
+    % positioning of nodes
+    \tikzset{
+      base/.style={draw, on chain, on grid, align=center, minimum height=4ex},
+      proc/.style={base, rectangle, text width=8em},
+      test/.style={base, diamond, aspect=2, text width=5em},
+      term/.style={proc, rounded corners},
+    }
+    % -------------------------------------------------
+    \node [term]            {输入图像};
+    \node [proc, join]      {计算灰度直方图$p_r(r_k)$};
+    \node [proc, join]      {计算累积分布$C(r_k)=\sum_{j=0}^k p_r(r_j)$};
+    \node [proc, join]      {得到均衡化变换$T(r_k)=(L-1)\operatorname{round}[C(r_k)]$};
+    \node [proc, join]      {遍历图像的每个像素$r_{x,y}$，\\得到输出图像的像素值$s_{x,y}=T(r_{x,y})$};
+    \node [term, join]      {输出均衡化图像};
+    \end{tikzpicture}
     \caption{直方图均衡化算法流程图}
     \label{fig:hist-eq-flowchart}
 \end{figure}
