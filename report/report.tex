@@ -167,9 +167,66 @@
 
 \subsection{基于局部统计特征的增强}
 
-首先计算图像的全局均值和标准差。
+首先计算图像的全局均值和标准差，然后遍历图像的每个像素点，求取其邻域内的局部均值和标准差，
+然后根据式~\eqref{eq:local-enh} 决定该点是否增强以及增强的结果。
+算法流程如图~\ref{fig:local-enh-flowchart} 所示。
 
-\todo
+\begin{figure}[!htb]
+    \centering
+    \begin{tikzpicture}[%
+        font=\footnotesize,
+        >=triangle 60,                  % Nice arrows; your taste may be different
+        start chain=going below,        % General flow is top-to-bottom
+        node distance=6mm and 60mm,     % Global setup of box spacing
+        every join/.style={->, draw},   % Default linetype for connecting boxes
+        ]
+    \tikzset{
+      base/.style={draw, on chain, text centered, minimum height=4ex},
+      proc/.style={base, rectangle, minimum width=8em},
+      test/.style={base, diamond, aspect=2, minimum width=4em},
+      term/.style={proc, rounded corners},
+      coord/.style={coordinate},
+      sel/.style={font=\scriptsize},
+      block/.style={rectangle, minimum width=15em, draw, dashed},
+    }
+    % 局部统计特征增强主体
+    \node [term]                        (in)     {\makecell{输入图像$f(x,y)$以及\\ 参数$k_0,k_1,k_2,E,r$}};
+    \node [proc, join]                  (glo)    {计算$m_G,\sigma_G$};
+    \node [proc, join]                  (mrk)    {\makecell{选取像素点$(x,y)$\\ 及其邻域$S_{x,y}$}};
+    \node [proc, join]                  (loc)    {计算$m_{S_{x,y}},\sigma_{S_{x,y}}$};
+    \node [proc, join]                           {根据式~\eqref{eq:local-enh} 计算$g(x,y)$};
+    \node [test, join]                  (nxt)    {下一个像素点$(x,y)$？};
+    \node [term]                        (out)    {输出图像$g(x,y)$};
+    \node [coord, left=3em of nxt.west] (lpx)    {};
+    \path [*->, draw] (nxt.south) -- node[sel,anchor=west]{遍历完成} (out);
+    \path [*-, draw] (nxt.west) -- node[sel,anchor=south]{继续} (lpx);
+    \path [->, draw] (lpx) |- (mrk);
+    % 计算均值与标准差
+    \node [term, right=5em of in.east]      (msin)  {输入计算区域$R$};
+    \node [proc, join]                      (msini) {\makecell{初始化$m_R=s_R=0$\\ 取起始点$(x,y)\in R$}};
+    \node [proc, join]                      (msadd) {\makecell{$m_R\mathbin{{+}{=}}f(x,y)/(M_RN_R)$\\ $s_R\mathbin{{+}{=}}[f(x,y)]^2/(M_RN_R)$}};
+    \node [test, join]                      (msnxt) {下一个像素点$(x,y)$？};
+    \node [proc]                            (msstd) {$\sigma_R=\sqrt{s_R-m_R^2}$};
+    \node [term, join]                      (msout) {输出$m_R,\sigma_R$};
+    \node [coord, right=3em of msnxt.east]  (mslpx) {};
+    \path [*->, draw] (msnxt.south) -- node[sel,anchor=west]{遍历完成} (msstd);
+    \path [*-, draw] (msnxt.east) -- node[sel,anchor=south]{继续} (mslpx);
+    \path [->, draw] (mslpx) |- (msadd);
+    \begin{scope}[on background layer]
+        \node [block,fit=(msin) (msini) (msadd) (msnxt) (msstd) (msout) (mslpx), label=计算均值与标准差子程序] (mssub) {};
+        \path [draw, dashed] (mssub.north west) -- (glo.north east);
+        \path [draw, dashed] (mssub.south west) -- (glo.south east);
+        \path [draw, dashed] (mssub.north west) -- (loc.north east);
+        \path [draw, dashed] (mssub.south west) -- (loc.south east);
+    \end{scope}
+    \end{tikzpicture}
+    \caption{局部统计特征增强算法流程图}
+    \label{fig:local-enh-flowchart}
+\end{figure}
+
+另外，值得一提的是，对于均值和标准差的计算，可以合并为一个可复用的子程序，
+并根据$D(x)=E(x^2)-E(x)^2$将二者的求取放在同一个循环中进行。
+使用这种方式，可能获得比直接按定义对二者分别计算更好的性能。
 
 \section{结果分析与讨论}
 
