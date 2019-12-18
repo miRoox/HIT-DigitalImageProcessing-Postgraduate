@@ -129,10 +129,6 @@
         node distance=6mm and 60mm,     % Global setup of box spacing
         every join/.style={->, draw},   % Default linetype for connecting boxes
         ]
-    % ------------------------------------------------- 
-    % A few box styles 
-    % <on chain> *and* <on grid> reduce the need for manual relative
-    % positioning of nodes
     \tikzset{
       base/.style={draw, on chain, text centered, minimum height=4ex},
       proc/.style={base, rectangle, minimum width=10em},
@@ -146,21 +142,21 @@
     \node [term]       (in) {输入图像$f(x,y)$};
     \node [proc, join] (ht) {计算灰度直方图$p_r(r_k)$};
     \node [proc, join]      {$C(r_k)=\sum_{j=0}^k p_r(r_j)$};
-    \node [proc, join]      {$T(r_k)=(L-1)\operatorname{round}[C(r_k)]$};
+    \node [proc, join]      {$T(r_k)=(L-1)\operatorname{int}[C(r_k)]$};
     \node [proc, join]      {$g(x,y)=T[f(x,y)]$};
     \node [term, join]      {输出图像$g(x,y)$};
     % 灰度直方图计算子程序
-    \node [term, right=5em of in.east]      (htin)     {输入图像$f(x,y)$};
-    \node [proc, join]                      (htinit)   {\makecell{初始化$p_r(r_k)=0$\\ $ (x,y)=(0,0)$}};
-    \node [proc, join]                      (htadd)    {$p_r[f(x,y)]\mathbin{{+}{=}}1/(MN)$};
-    \node [test, join]                      (htnext)   {下一个像素点$(x,y)$？};
-    \node [term]                            (htout)    {输出直方图$p_r(r_k)$};
-    \node [coord, right=3em of htnext.east] (htnextx)  {};
-    \path [*->, draw] (htnext.south) -- node[sel,anchor=west]{遍历完成} (htout);
-    \path [*-, draw] (htnext.east) -- node[sel,anchor=south]{继续} (htnextx);
-    \path [->, draw] (htnextx) |- (htadd);
+    \node [term, right=5em of in.east]      (htin)  {输入图像$f(x,y)$};
+    \node [proc, join]                      (htini) {\makecell{初始化$p_r(r_k)=0$\\ $ (x,y)=(0,0)$}};
+    \node [proc, join]                      (htadd) {$p_r[f(x,y)]\mathbin{{+}{=}}1/(MN)$};
+    \node [test, join]                      (htnxt) {下一个像素点$(x,y)$？};
+    \node [term]                            (htout) {输出直方图$p_r(r_k)$};
+    \node [coord, right=3em of htnxt.east]  (htlpx) {};
+    \path [*->, draw] (htnxt.south) -- node[sel,anchor=west]{遍历完成} (htout);
+    \path [*-, draw] (htnxt.east) -- node[sel,anchor=south]{继续} (htlpx);
+    \path [->, draw] (htlpx) |- (htadd);
     \begin{scope}[on background layer]
-        \node [block,fit=(htin) (htinit) (htadd) (htnext) (htout) (htnextx)] (htsub) {};
+        \node [block,fit=(htin) (htini) (htadd) (htnxt) (htout) (htlpx)] (htsub) {};
         \path [draw, dashed] (htsub.north west) -- (ht.north east);
         \path [draw, dashed] (htsub.south west) -- (ht.south east);
     \end{scope}
