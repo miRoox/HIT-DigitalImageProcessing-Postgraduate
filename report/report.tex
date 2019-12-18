@@ -4,7 +4,8 @@
 \usepackage{amsmath}
 \usepackage{physics}
 \usepackage{caption}
-\usepackage{subcaption}
+\usepackage[labelformat=simple]{subcaption}
+\usepackage[section]{placeins}
 \usepackage{tikz}
 \usepackage{makecell}
 \usepackage[outputdir={out}]{minted}% 代码高亮，需要Pygments
@@ -30,7 +31,9 @@
 % C++代码高亮
 \newmintedfile[cppfile]{cpp}{linenos,mathescape,fontsize=\footnotesize}
 
-\newcommand{\todo}{{\emph{待完善}\par}}
+\renewcommand\thesubfigure{(\alph{subfigure})} % 得到“图 1(a)”形式的引用
+
+% \newcommand{\todo}{{\emph{待完善}\par}}
 
 \begin{document}
 \maketitle
@@ -234,11 +237,55 @@
 \begin{figure}[!htb]
     \centering
     \subcaptionbox{原图像\label{fig:tungsten-origin}}{\includegraphics[width=0.3\linewidth]{tungsten.png}}\hfill
-    \subcaptionbox{全局直方图均衡的结果\label{fig:tungsten-global}}{\includegraphics[width=0.3\linewidth]{tungsten-global.png}}\hfill
+    \subcaptionbox{直方图均衡化的结果\label{fig:tungsten-global}}{\includegraphics[width=0.3\linewidth]{tungsten-global.png}}\hfill
     \subcaptionbox{局部统计增强的结果\label{fig:tungsten-local}}{\includegraphics[width=0.3\linewidth]{tungsten-local.png}}
-    \caption{放大的钨丝SME图像及其对应增强图像}
+    \caption{放大的钨丝SEM图像及其对应增强图像}
     \label{fig:tungsten}
 \end{figure}
+
+图~\ref{fig:tungsten-origin} 显示了一根绕在支架上的钨丝的扫描电子显微镜（SEM）图像。图像中央的钨丝及其支架很清楚并很容易分析。
+在该图像的右侧黑暗部分，有另一根钨丝的结构，但几乎不能察觉到，其大小与特征也难以辨认。
+为了增强该图像以使暗处的钨丝也能够分辨，对图像进行了直方图均衡化处理和局部统计增强处理，
+得到的结果分别如图~\ref{fig:tungsten-global} 和图~\ref{fig:tungsten-local} 所示。
+
+\begin{figure}[!htb]
+    \centering
+    \includegraphics[width=0.8\linewidth]{tungsten-hist.png}
+    \caption{原图像的灰度直方图}
+    \label{fig:tungsten-origin-hist}
+\end{figure}
+
+从图~\ref{fig:tungsten-global} 中可以看到，直方图均衡化能够增强图像地对比度，补偿图像在视觉上难以区分灰度级的差别。
+但它对图像的作用是在空间上是均匀的，且处理过程无法产生新的灰度级，这意味着在增强前景的同时，对大面积的均匀黑暗背景也有所增强。
+通过对比图~\ref{fig:tungsten-origin-hist} 和图~\ref{fig:tungsten-global-hist} 的尖峰移动趋势可以直观的看到这种现象。
+从而导致均衡化后的结果在一定程度上反而“冲淡”了人对目标和背景的辨识度。
+同样，受制于这种空间上的均匀性，对于处于暗处与背景灰度相近的另一根钨丝目标，其细节的清晰度并没有明显的改善。
+
+\begin{figure}[!htb]
+    \centering
+    \includegraphics[width=0.8\linewidth]{tungsten-global-hist.png}
+    \caption{直方图均衡化结果的灰度直方图}
+    \label{fig:tungsten-global-hist}
+\end{figure}
+
+\begin{figure}[!htb]
+    \centering
+    \includegraphics[width=0.8\linewidth]{tungsten-local-hist.png}
+    \caption{局部统计增强结果的灰度直方图}
+    \label{fig:tungsten-local-hist}
+\end{figure}
+
+图~\ref{fig:tungsten-local} 给出了基于局部统计特征增强的结果。这一方法有几个参数可以选取。
+在这里使用的是 $k_0=0.4,k_1=0.02,k_2=0.4,E=4$，以及大小为 $3\times3$ 的局部区域。
+这些参数一般需要通过一些试验得到，但也可以通过简单的分析估计其大致的范围。
+比如 $k_0$ 选取之所以比 $50\%$ 略小，是因为我们直观上观察这副图像，
+可以大致估计出我们需要增强的区域（暗处的钨丝）的灰度范围确实比全局平均灰度的一半还要略小一些。
+
+从图~\ref{fig:tungsten-local} 中可以看到，现在暗处的钨丝脊线已经变得非常清楚，同时左侧的原本清晰的钨丝以及暗背景基本保持不变。
+这表明局部统计增强能够增强暗区域的目标，同时尽可能保留亮区域的目标和背景不变。
+另一方面，对比图~\ref{fig:tungsten-origin-hist} 和图~\ref{fig:tungsten-local-hist} 也可以看到局部统计增强基本不改变直方图的趋势轮廓，
+不会出现全局直方图均衡化那样减弱背景和目标区分度的情况。
+不过，由于目标和背景之间的边界处也会存在满足条件的对比度情况，因此局部统计增强可能导致目标边界的背景被增强，形成一道不太协调的灰色轮廓。
 
 \appendix
 
