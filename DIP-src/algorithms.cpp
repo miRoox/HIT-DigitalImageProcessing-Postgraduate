@@ -2,6 +2,7 @@
 #include <cmath>
 #include <numeric>
 #include <tuple>
+#include <QRect>
 
 //! 计算图像直方图数据
 QVector<double> histogram(const QImage& image)
@@ -48,18 +49,13 @@ QImage localStatisticalEnhance(const QImage &image,
     QImage out(image.size(),QImage::Format_Grayscale8);
     const int width = image.width();
     const int height = image.height();
-    auto evalMeanStd = [=,&image](int xl, int xh, int yl, int yh)->auto {
-        uint size = 0;
+    auto evalMeanStd = [&image](const QRect& reg)->auto {
+        int size = reg.width()*reg.height();
         double mean = 0;
         double mean2 = 0;
-        for (int y=yl; y<=yh; ++y) {
-            if (y<0 || y>=height)
-                continue;
+        for (int y=reg.top(); y<=reg.bottom(); ++y) {
             const uint8_t* line = image.scanLine(y);
-            for (int x=xl; x<=xh; ++x) {
-                if (x<0 || x>=width)
-                    continue;
-                size  += 1;
+            for (int x=reg.left(); x<=reg.right(); ++x) {
                 mean  += line[x];
                 mean2 += line[x]*line[x];
             }
@@ -69,12 +65,15 @@ QImage localStatisticalEnhance(const QImage &image,
         double stdv = std::sqrt(mean2-mean*mean); // $D(x)=E(x^2)-E(x)^2$
         return std::make_tuple(mean,stdv);
     };
-    const auto [gMean, gStd] = evalMeanStd(0, width-1, 0, height-1);
+    const QRect fullReg = image.rect();
+    const auto [gMean, gStd] = evalMeanStd(fullReg);
+    QRect reg{-r,-r,2*r+1,2*r+1};
     for (int y=0; y<height; ++y) {
         const uint8_t* line = image.scanLine(y);
         uint8_t* outLine = out.scanLine(y);
         for (int x=0; x<width; ++x) {
-            const auto [lMean, lStd] = evalMeanStd(x-r, x+r, y-r, y+r);
+            reg.moveCenter({x,y});
+            const auto [lMean, lStd] = evalMeanStd(reg&fullReg);
             outLine[x] = lMean<=k0*gMean && lStd>=k1*gStd && lStd<=k2*gStd
                         ? static_cast<uint8_t>(std::clamp(e*line[x],0.,1.*UINT8_MAX))
                         : line[x];
