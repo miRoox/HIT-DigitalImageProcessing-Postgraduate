@@ -426,7 +426,7 @@ static void setupHistogramView(QChartView*const view, QChart*const chart)
 
 static QImage renderGraphicsView(QGraphicsView*const view)
 {
-    QImage image(view->rect().size(),QImage::Format_ARGB32);
+    QImage image(view->rect().size()*4,QImage::Format_ARGB32);
     QPainter painter(&image);
     view->render(&painter);
     return image;
