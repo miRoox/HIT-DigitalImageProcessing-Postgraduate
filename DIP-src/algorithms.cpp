@@ -50,18 +50,16 @@ QImage localStatisticalEnhance(const QImage &image,
     const int width = image.width();
     const int height = image.height();
     auto evalMeanStd = [&image](const QRect& reg)->auto {
-        int size = reg.width()*reg.height();
+        const int size = reg.width()*reg.height();
         double mean = 0;
         double mean2 = 0;
         for (int y=reg.top(); y<=reg.bottom(); ++y) {
             const uint8_t* line = image.scanLine(y);
             for (int x=reg.left(); x<=reg.right(); ++x) {
-                mean  += line[x];
-                mean2 += line[x]*line[x];
+                mean  += 1.0*line[x]/size;
+                mean2 += 1.0*line[x]*line[x]/size;
             }
         }
-        mean  /= size;
-        mean2 /= size;
         double stdv = std::sqrt(mean2-mean*mean); // $D(x)=E(x^2)-E(x)^2$
         return std::make_tuple(mean,stdv);
     };
