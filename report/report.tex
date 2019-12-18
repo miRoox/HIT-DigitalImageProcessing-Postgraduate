@@ -156,7 +156,7 @@
     \path [*-, draw] (htnxt.east) -- node[sel,anchor=south]{继续} (htlpx);
     \path [->, draw] (htlpx) |- (htadd);
     \begin{scope}[on background layer]
-        \node [block,fit=(htin) (htini) (htadd) (htnxt) (htout) (htlpx)] (htsub) {};
+        \node [block,fit=(htin) (htini) (htadd) (htnxt) (htout) (htlpx), label=灰度直方图计算子程序] (htsub) {};
         \path [draw, dashed] (htsub.north west) -- (ht.north east);
         \path [draw, dashed] (htsub.south west) -- (ht.south east);
     \end{scope}
@@ -213,7 +213,7 @@
     \path [*-, draw] (msnxt.east) -- node[sel,anchor=south]{继续} (mslpx);
     \path [->, draw] (mslpx) |- (msadd);
     \begin{scope}[on background layer]
-        \node [block,fit=(msin) (msini) (msadd) (msnxt) (msstd) (msout) (mslpx), label=计算均值与标准差子程序] (mssub) {};
+        \node [block,fit=(msin) (msini) (msadd) (msnxt) (msstd) (msout) (mslpx), label=均值与标准差计算子程序] (mssub) {};
         \path [draw, dashed] (mssub.north west) -- (glo.north east);
         \path [draw, dashed] (mssub.south west) -- (glo.south east);
         \path [draw, dashed] (mssub.north west) -- (loc.north east);
