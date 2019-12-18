@@ -4,6 +4,7 @@
 \usepackage{amsmath}
 \usepackage{physics}
 \usepackage{caption}
+\usepackage{subcaption}
 \usepackage{tikz}
 \usepackage{makecell}
 \usepackage[outputdir={out}]{minted}% 代码高亮，需要Pygments
@@ -230,7 +231,14 @@
 
 \section{结果分析与讨论}
 
-\todo
+\begin{figure}[!htb]
+    \centering
+    \subcaptionbox{原图像\label{fig:tungsten-origin}}{\includegraphics[width=0.3\linewidth]{tungsten.png}}\hfill
+    \subcaptionbox{全局直方图均衡的结果\label{fig:tungsten-global}}{\includegraphics[width=0.3\linewidth]{tungsten-global.png}}\hfill
+    \subcaptionbox{局部统计增强的结果\label{fig:tungsten-local}}{\includegraphics[width=0.3\linewidth]{tungsten-local.png}}
+    \caption{放大的钨丝SME图像及其对应增强图像}
+    \label{fig:tungsten}
+\end{figure}
 
 \appendix
 
