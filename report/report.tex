@@ -8,8 +8,15 @@
 \usepackage[section]{placeins}
 \usepackage{tikz}
 \usepackage{makecell}
-\usepackage[outputdir={out}]{minted}% 代码高亮，需要Pygments
 \usepackage{url}
+
+\newtoggle{nocode}
+\settoggle{nocode}{false}
+\nottoggle{nocode}{
+    \usepackage[outputdir={out}]{minted}% 代码高亮，需要Pygments
+    % C++代码高亮
+    \newmintedfile[cppfile]{cpp}{linenos,mathescape,fontsize=\footnotesize}
+}{}
 
 \usetikzlibrary{shapes,arrows,chains,fit,positioning,backgrounds}
 
@@ -27,9 +34,6 @@
 \ctexset{
     section/format=\Large\bfseries
 }
-
-% C++代码高亮
-\newmintedfile[cppfile]{cpp}{linenos,mathescape,fontsize=\footnotesize}
 
 \renewcommand\thesubfigure{(\alph{subfigure})} % 得到“图 1(a)”形式的引用
 
@@ -287,6 +291,7 @@
 不会出现全局直方图均衡化那样减弱背景和目标区分度的情况。
 不过，由于目标和背景之间的边界处也会存在满足条件的对比度情况，因此局部统计增强可能导致目标边界的背景被增强，形成一道不太协调的灰色轮廓。
 
+\nottoggle{nocode}{
 \appendix
 
 \section{算法源码}
@@ -305,5 +310,6 @@
 \noindent 源文件\textbf{algorithms.cpp}:
 
 \cppfile{../DIP-src/algorithms.cpp}
+}{}
 
 \end{document}
