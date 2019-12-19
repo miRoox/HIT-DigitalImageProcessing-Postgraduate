@@ -14,9 +14,12 @@
    <bool>true</bool>
   </property>
   <property name="windowTitle">
-   <string>数字图像处理 - 作业</string>
+   <string>数字图像处理大作业</string>
   </property>
   <widget class="QWidget" name="centralwidget">
+   <property name="acceptDrops">
+    <bool>true</bool>
+   </property>
    <layout class="QHBoxLayout" name="horizontalLayout">
     <item>
      <widget class="QTabWidget" name="tabWidget">
@@ -25,7 +28,7 @@
       </property>
       <widget class="QWidget" name="originTab">
        <attribute name="title">
-        <string>原图</string>
+        <string>原图像</string>
        </attribute>
        <layout class="QHBoxLayout" name="horizontalLayout_2">
         <item>
@@ -85,7 +88,7 @@
       </widget>
       <widget class="QWidget" name="localEnhTab">
        <attribute name="title">
-        <string>局部直方图统计增强</string>
+        <string>基于局部统计特征的增强</string>
        </attribute>
        <layout class="QVBoxLayout" name="verticalLayout">
         <item>

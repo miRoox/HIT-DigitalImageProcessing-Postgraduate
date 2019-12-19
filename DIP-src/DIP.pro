@@ -5,14 +5,13 @@ TARGET = DIP
 
 CONFIG(release, debug|release):  DESTDIR = ../bin
 
-VERSION = 1.0.0
+VERSION = 1.0.1
 
 QT       += core gui charts
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
 CONFIG += c++17
-#mac: CONFIG -= app_bundle
 
 # The following define makes your compiler emit warnings if you use
 # any Qt feature that has been marked deprecated (the exact warnings
@@ -44,8 +43,3 @@ RESOURCES += \
 
 win32: RC_ICONS = DIP.ico
 mac: ICON = DIP.icns
-
-#CONFIG(release, debug|release) {
-#      win32: QMAKE_POST_LINK += $$[QT_INSTALL_BINS]/windeployqt $$shell_path($$absolute_path($$DESTDIR))  $$escape_expand(\\n\\t)
-#      mac: QMAKE_POST_LINK += $$[QT_INSTALL_BINS]/macdeployqt $$shell_path($$absolute_path($$DESTDIR))  $$escape_expand(\\n\\t)
-#}

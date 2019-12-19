@@ -169,12 +169,13 @@ MainWindow::MainWindow(QWidget *parent)
         ui->toolBar->addAction(QIcon(":/rc/icon/information.png"),
                                tr("关于"),[this]{
             QMessageBox::about(this,tr("关于本程序"),
-                               tr("<h1>数字图像处理 - 作业</h1>")+
+                               tr("<h1>数字图像处理大作业</h1>")+
                                tr("<h2>局部统计特征增强</h2>")+
                                tr("<p>并与全局直方图均衡化对比，用钨丝灰度图。</p>")+
                                tr("<hr/>")+
                                tr("<p>本程序基于<a href=\"https://www.qt.io/\">Qt</a>构建</p>")+
-                               tr("<p>图标由<a href=\"https://www.flaticon.com/authors/good-ware\" title=\"Good Ware\">Good Ware</a>和<a href=\"https://www.flaticon.com/authors/freepik\" title=\"Freepik\">Freepik</a>制作</p>"));
+                               tr("<p>程序源码托管于<a href=\"https://github.com/miRoox/HIT-DigitalImageProcessing-Postgraduate\">GitHub</a></p>")+
+                               tr("<p>图标由<a href=\"https://www.flaticon.com/authors/good-ware\">Good Ware</a>和<a href=\"https://www.flaticon.com/authors/freepik\">Freepik</a>制作</p>"));
         });
     } // “关于”按钮
 
@@ -228,7 +229,7 @@ MainWindow::MainWindow(QWidget *parent)
                 ui->tabWidget->setCurrentWidget(tab);
                 auto splitter = tab->findChild<QSplitter*>();
                 Q_CHECK_PTR(splitter);
-                int prefSize = std::min(image.width(),splitter->height()); // 更换图像的时候调整显示区域尺寸
+                int prefSize = std::min(image.width(),image.width()*splitter->height()/image.height()); // 更换图像的时候调整显示区域尺寸
                 splitter->setSizes({prefSize,splitter->width()-prefSize});
                 imageView->fitInView(scene->itemsBoundingRect(),Qt::KeepAspectRatio);
                 imageView->updateGeometry();
@@ -286,9 +287,9 @@ MainWindow::MainWindow(QWidget *parent)
     setupViews(origin,ui->originView,ui->originHistView,ui->originTab,
                tr("原图像的灰度直方图"),&MainWindow::imageLoaded);
     setupViews(globalEnh,ui->globalEnhView,ui->globalEnhHistView,ui->globalEnhTab,
-               tr("全局直方图均衡化图像的灰度直方图"),&MainWindow::globalEnhUpdated);
+               tr("直方图均衡化结果的灰度直方图"),&MainWindow::globalEnhUpdated);
     setupViews(localEnh,ui->localEnhView,ui->localEnhHistView,ui->localEnhTab,
-               tr("局部统计增强图像的灰度直方图"),&MainWindow::localEnhUpdated);
+               tr("局部统计增强结果的灰度直方图"),&MainWindow::localEnhUpdated);
 }
 
 MainWindow::~MainWindow()

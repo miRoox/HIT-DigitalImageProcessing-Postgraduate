@@ -44,8 +44,7 @@
 
 \section{题目}
 
-局部统计特征增强
-
+局部统计特征增强\\
 并与全局直方图均衡化对比，用钨丝灰度图。
 
 \section{数学原理}
@@ -115,7 +114,7 @@
 则对于$x=0,1,\cdots,M-1,\,y=0,1,\cdots,N-1$，有
 \begin{equation}\label{eq:local-enh}
     g(x,y)=\begin{cases}
-        E\cdot f(x,y) & m_{S_{x,y}}\le m_G\,\text{且}\,k_1\sigma_G\le\sigma_{S_{x,y}}\le k_2\sigma_G\\
+        E\cdot f(x,y) & m_{S_{x,y}}\le m_G \land k_1\sigma_G\le\sigma_{S_{x,y}}\le k_2\sigma_G\\
         f(x,y) & \text{其它}
     \end{cases}
 \end{equation}
@@ -254,7 +253,7 @@
 
 \begin{figure}[!htb]
     \centering
-    \includegraphics[width=0.8\linewidth]{tungsten-hist.png}
+    \includegraphics[width=0.9\linewidth]{tungsten-hist.png}
     \caption{原图像的灰度直方图}
     \label{fig:tungsten-origin-hist}
 \end{figure}
@@ -267,14 +266,14 @@
 
 \begin{figure}[!htb]
     \centering
-    \includegraphics[width=0.8\linewidth]{tungsten-global-hist.png}
+    \includegraphics[width=0.9\linewidth]{tungsten-global-hist.png}
     \caption{直方图均衡化结果的灰度直方图}
     \label{fig:tungsten-global-hist}
 \end{figure}
 
 \begin{figure}[!htb]
     \centering
-    \includegraphics[width=0.8\linewidth]{tungsten-local-hist.png}
+    \includegraphics[width=0.9\linewidth]{tungsten-local-hist.png}
     \caption{局部统计增强结果的灰度直方图}
     \label{fig:tungsten-local-hist}
 \end{figure}
@@ -296,12 +295,13 @@
 
 \section{算法源码}
 
-程序使用 C++ 基于 Qt 框架开发，完整的源码见 GitHub 仓库：\\
+程序使用 C++ 语言基于 Qt 框架开发，完整的源码见 GitHub 仓库：\\
 \url{https://github.com/miRoox/HIT-DigitalImageProcessing-Postgraduate}
 
-代码仓库中也包含报告的 \LaTeX{} 源码和一个 \textsc{Matlab} 版代码。
+代码仓库中也包含报告的 \LaTeX{} 源码和一个 \textsc{Matlab} 版代码，
+编译得到的可执行的程序可以在仓库的“releases”页面找到。
 
-下面只附上算法 C++ 实现的核心源码：
+\noindent 下面只附上算法 C++ 实现的核心源码：
 
 \noindent 头文件\textbf{algorithms.h}:
 
