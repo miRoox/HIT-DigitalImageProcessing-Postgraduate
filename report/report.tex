@@ -35,6 +35,8 @@
     section/format=\Large\bfseries
 }
 
+\graphicspath{{figures/}}
+
 \renewcommand\thesubfigure{(\alph{subfigure})} % 得到“图 1(a)”形式的引用
 
 % \newcommand{\todo}{{\emph{待完善}\par}}
@@ -235,7 +237,7 @@
 并根据$D(x)=E(x^2)-E(x)^2$将二者的求取放在同一个循环中进行。
 使用这种方式，可能获得比直接按定义对二者分别计算更好的性能。
 
-\section{结果分析与讨论}
+\section{实验结果与分析}
 
 \begin{figure}[!htb]
     \centering
@@ -288,11 +290,40 @@
 这表明局部统计增强能够增强暗区域的目标，同时尽可能保留亮区域的目标和背景不变。
 另一方面，对比图~\ref{fig:tungsten-origin-hist} 和图~\ref{fig:tungsten-local-hist} 也可以看到局部统计增强基本不改变直方图的趋势轮廓，
 不会出现全局直方图均衡化那样减弱背景和目标区分度的情况。
-不过，由于目标和背景之间的边界处也会存在满足条件的对比度情况，因此局部统计增强可能导致目标边界的背景被增强，形成一道不太协调的灰色轮廓。
+不过，由于目标和背景之间的边界处也会存在满足条件的对比度情况，因此局部统计增强可能导致目标边界的背景被增强，形成一道不太协调的灰色边线。
 
-\nottoggle{nocode}{
+\section{结论}
+
+一般而言，直方图均衡化能够增强图像地对比度，补偿图像在视觉上难以区分灰度级的差别，
+但它的作用在空间是是均匀的，不能单独强化图像中具有特定特征的局部目标，并且有减少图像灰度级的趋势。
+而基于局部统计特征的增强能有效增强我们期望的局部图像细节，但其效果很大程度上依赖于参数的选取，需要一定的先验分析或者试验调节。
+
 \appendix
 
+\section{遇到的问题}
+
+\begin{figure}[htb]
+    \centering
+    \subcaptionbox{图像异常的缩放\label{fig:fit-exception}}{\includegraphics[width=0.48\linewidth]{exception.png}}\hfill
+    \subcaptionbox{修复后的结果\label{fig:fit-exception}}{\includegraphics[width=0.48\linewidth]{fit.png}}
+    \caption{视图控件与图像的适配}
+    \label{fig:fit}
+\end{figure}
+
+由于程序使用 C++ 实现，并制作了图形界面，开发过程中遇到了许多代码实践上的问题。例如：
+在开始的设计中，图形视图控件的大小并没有特别的设置，导致在显示的图片通常要么留有较多的空白边距，
+要么溢出视图范围，需要手动缩放才能完整看到，视觉效果非常糟糕（issue \#3）。
+为了解决这个问题，尝试让视图控件和图像之间互相适配，然而效果总无法达到预期。
+在一番探索之下，发现了 Qt 的一个 bug——\texttt{fitInView} 方法在视图控件未显示的时候会导致异常的缩放，
+而三个标签页中总有两个是不显示的，从而导致部分图像显示过小。
+
+确定问题的原因后，解决起来也就不困难了。
+当然，我们不可能把问题报告给 Qt 后等着修复，而应当考虑绕过问题的方式。
+实际上，我们只要在视图控件调用 \texttt{fitInView} 方法之前先切换到对应的标签页，而在完成后切换回原来的标签页即可。
+由于这一过程时间极短，人在视觉上也不会有任何异常感。
+从而通过简单的障眼法绕开了 bug，解决了问题。
+
+\nottoggle{nocode}{
 \section{算法源码}
 
 程序使用 C++ 语言基于 Qt 框架开发，完整的源码见 GitHub 仓库：\\
