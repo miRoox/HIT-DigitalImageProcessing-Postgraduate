@@ -153,11 +153,11 @@ MainWindow::MainWindow(QWidget *parent)
         auto waction = new QWidgetAction(settingBtn);
         auto panel = new QWidget;
         auto panelLayout = new QFormLayout(panel);
-        panelLayout->addRow(tr("k&0:"),k0Slider);
-        panelLayout->addRow(tr("k&1:"),k1Slider);
-        panelLayout->addRow(tr("k&2:"),k2Slider);
-        panelLayout->addRow(tr("&E:"),eSlider);
-        panelLayout->addRow(tr("&r:"),rSlider);
+        panelLayout->addRow(tr("k<sub>0</sub>:"),k0Slider);
+        panelLayout->addRow(tr("k<sub>1</sub>:"),k1Slider);
+        panelLayout->addRow(tr("k<sub>2</sub>:"),k2Slider);
+        panelLayout->addRow(tr("E:"),eSlider);
+        panelLayout->addRow(tr("r:"),rSlider);
         waction->setDefaultWidget(panel);
         auto menu = new QMenu;
         menu->addAction(waction);
